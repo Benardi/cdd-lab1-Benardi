@@ -1,11 +1,11 @@
 ---
-title: "EDA Got and Xena"
+title: "EDA Game of Thrones (GOT) and Xena the Warrior Princess"
 output:
-  html_document:
-    df_print: paged
+  html_notebook:
     toc: yes
     toc_float: yes
-  html_notebook:
+  html_document:
+    df_print: paged
     toc: yes
     toc_float: yes
 ---
@@ -16,7 +16,8 @@ library(here)
 theme_set(theme_bw())
 ```
 
-Analisaremos as avaliações do IMDB das séries Game of Thrones e Xena The Warrior Princess
+Analisaremos as avaliações do IMDB das séries Game of Thrones e Xena The Warrior Princess.  
+
 ```{r}
 episodes = read_csv(here("data/series_from_imdb.csv"), 
                     progress = FALSE,
@@ -28,9 +29,23 @@ episodes = read_csv(here("data/series_from_imdb.csv"),
            filter(series_name %in% c("Game of Thrones","Xena a Princesa Guerreira")) %>%
            glimpse()
 ```
-## Qual das séries que é mais bem avaliada no IMDB? 
 
+## Qual das séries é mais bem avaliada no IMDB? 
 
+```{r}
+form <- function(x) c(mean = mean(x),
+                      max = max(x),
+                      min = min(x),
+                      q1 = quantile(x, 0.25), 
+                      q2 = quantile(x, 0.50),
+                      q3 = quantile(x, 0.75))
+
+episodes %>% 
+          subset(select=c("user_rating", "series_name")) %>%
+          aggregate(user_rating ~ series_name, ., form) %>%
+          do.call(data.frame, .) %>%
+          setNames(c("series_name","mean","max","min","q1","q2","q3"))
+```
 
 ```{r}
 episodes %>% 
@@ -44,6 +59,12 @@ episodes %>%
           axis.text.x=element_blank(),
           axis.ticks.x=element_blank())
 ```
+*  Em especial em termos de mediana GOT está bem acima com seus 8.95 contra os 7.80 de Xena.
+* É possível notar que a quase totalidade das notas de GOT (min = 8.0) está pelo menos muito próxima do terceiro quartil de Xena (8.5). 
+* É possível perceber que a densidade de frequência (violin-plot) das notas de GOT é  mais alta em torno de entre [8.5, 9] enquanto que a densidade de frequência das notas de Xena é mais alta entre ao redor de 8.0. 
+
+Em termos de quartis e de densidade de frequência **a série _Game of Thrones_ é mais bem avaliada do que a série _Xena a Princesa Guerreira_ no IMBD**.  
+
 ```{r}
 form <- function(x) c(mean = mean(x), sd = sd(x), n =length(x))
 
@@ -61,6 +82,12 @@ episodes %>%
     scale_y_continuous(limits = c(0,10)) +
     labs(y = "mean user_rating")
 ```
+
+* Comparando a avalição média dos usúarios para Game of Thrones (9.046667) com a avaliação média de Xena (7.715672), Game of Thrones sai mais uma vez como a mais bem avaliada.
+
+* Observando as barras de erro (erro padrão da média), relativamente pequenas e suficientemente distantes uma da outra, estas não aparentam minorar o que os valores médios apontam.   
+
+Assim, tanto os valores médios como o gráfico, que inclui o erro médio, reforçam a afirmação de que **a série _Game of Thrones_ é mais bem avaliada que a série _Xena the Warrior Princess_ no IMBD**.  
 
 ###  Muda de acordo com as temporadas da série?
 
