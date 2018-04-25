@@ -1,0 +1,119 @@
+---
+title: "EDA Got and Xena"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_float: yes
+  html_notebook:
+    toc: yes
+    toc_float: yes
+---
+
+```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(here)
+theme_set(theme_bw())
+```
+
+Analisaremos as avaliações do IMDB das séries Game of Thrones e Xena The Warrior Princess
+```{r}
+episodes = read_csv(here("data/series_from_imdb.csv"), 
+                    progress = FALSE,
+                    col_types = cols(.default = col_double(), 
+                                     series_name = col_character(), 
+                                     episode = col_character(), 
+                                     url = col_character(),
+                                     season = col_character())) %>% 
+           filter(series_name %in% c("Game of Thrones","Xena a Princesa Guerreira")) %>%
+           glimpse()
+```
+## Qual das séries que é mais bem avaliada no IMDB? 
+
+
+
+```{r}
+episodes %>% 
+    ggplot(aes(x = series_name,
+               y = user_rating,
+               group=series_name,
+               color=series_name)) +
+    geom_violin() +
+    geom_boxplot(width=.1) +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())
+```
+```{r}
+form <- function(x) c(mean = mean(x), sd = sd(x), n =length(x))
+
+episodes %>% 
+    aggregate(user_rating ~ series_name, ., form) %>%
+    do.call(data.frame, .) %>%
+    mutate(se = user_rating.sd/sqrt(user_rating.n)) %>%
+    setNames(c("series_name","mean","sd","n","se")) %>% 
+    ggplot(aes(series_name,mean, fill = series_name)) + 
+    geom_bar(stat='identity') + 
+    geom_errorbar(aes(width= 0.25,
+                      ymax = mean + se,
+                      ymin = mean - se)) +
+    scale_fill_discrete(name = "Série") + 
+    scale_y_continuous(limits = c(0,10)) +
+    labs(y = "mean user_rating")
+```
+
+###  Muda de acordo com as temporadas da série?
+
+```{r}
+episodes %>% 
+  ggplot(aes(x = series_name, y = user_rating, fill=season)) +
+    geom_boxplot(position = position_dodge(width = 0.9)) 
+```
+
+Existe uma certa mudança na distribuição dos valores quando consideramos temporadas distin
+
+```{r}
+episodes %>% 
+  ggplot(aes(x = series_name,
+             y = user_rating,
+             color=series_name)) + 
+    facet_wrap(~ season) + 
+    geom_boxplot(position = position_dodge(width = 0.9)) +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())
+```
+
+## Qual das séries tem episódios de qualidade mais irregular segundo o IMDB?
+
+```{r}
+episodes %>% 
+  ggplot(aes(x = series_name, y = user_rating)) + 
+    geom_jitter(width = 0.25) 
+```
+
+```{r}
+episodes %>%
+  ggplot(aes(user_rating,color=series_name)) +
+    geom_density()
+```
+
+```{r}
+episodes %>% 
+  ggplot(aes(x = series_name,
+             y = user_rating,
+             color=series_name)) +
+    geom_jitter(width = 0.25) +
+    facet_wrap(~ season) +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())
+```
+
+```{r}
+episodes %>%
+  ggplot(aes(user_rating,color=series_name)) +
+    geom_density() +
+    facet_wrap(~ season)
+```
+
