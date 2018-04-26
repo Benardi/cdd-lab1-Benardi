@@ -1,11 +1,11 @@
 ---
 title: "EDA Game of Thrones (GOT) and Xena the Warrior Princess"
 output:
-  html_notebook:
-    toc: yes
-    toc_float: yes
   html_document:
     df_print: paged
+    toc: yes
+    toc_float: yes
+  html_notebook:
     toc: yes
     toc_float: yes
 ---
@@ -230,18 +230,35 @@ Consideraremos os 20% iniciais e os 20% finais como o começo e fim de temporada
 form <- function(x) c(mean = mean(x),
                       max = max(x),
                       min = min(x),
-                      q1 = quantile(x, 0.25), 
-                      q2 = quantile(x, 0.50),
-                      q3 = quantile(x, 0.75))
+                      n =length(x))
+                
 
 epsd_summr <- 
     episodes %>% 
     subset(select=c("season_ep", "season","series_name")) %>%
     aggregate(season_ep ~ series_name+season, ., form) %>%
     do.call(data.frame, .) %>%
-    setNames(c("series","seasn","mean","max","min","q1","q2","q3")) 
+    setNames(c("series_name","season","mean","max","min","n")) %>%
+    rowwise() %>%
+    mutate(p20 = quantile(seq(from=1, to=n, by=1), 0.20)) %>%
+    mutate(p80 = quantile(seq(from=1, to=n, by=1), 0.80))
 
 epsd_summr
+```
+
+```{r}
+episodes <- merge(episodes, epsd_summr) %>% 
+    rowwise() %>%
+    mutate(middle_eps = (season_ep > p20) &
+               (season_ep < p80)) 
+episodes
+```
+
+
+```{r}
+episodes %>% 
+  ggplot(aes(x = middle_eps, y = user_rating)) + 
+    geom_jitter(width = 0.25) 
 ```
 
 ```{r}
@@ -264,6 +281,21 @@ filtered %>%
 * Temporada 6: Maior rating foi no começo da temporada
 
 Para Xena 50% das temporadas tiveram seu melhor rating no meio da temporada e 50% tiveram seu melhor rating no começo/fim da temporada.
+
+```{r}
+episodes %>% 
+  filter(series_name %in% c("Xena a Princesa Guerreira")) %>%
+  ggplot(aes(x = middle_eps,
+             y = user_rating,
+             color = middle_eps)) + 
+    facet_wrap(~ season) + 
+    geom_boxplot(position = position_dodge(width = 0.9)) +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank()) +
+    ggtitle("Distribuição de votação metada da temporada versus começo/fim (Xena)")
+```
+
 
 ```{r}
 
@@ -290,6 +322,22 @@ filtered %>%
 Para GOT 100% das temporadas tiveram seu melhor rating no começo/fim da temporada.
 
 **Os períodos de melhor rating ficaram divididos para a série Xena e foram claramente o começo/fim da série para GOT.** 
+
+```{r}
+episodes %>% 
+    filter(series_name %in% c("Game of Thrones")) %>%
+    ggplot(aes(x = middle_eps,
+             y = user_rating,
+             color = middle_eps)) + 
+    facet_wrap(~ season) + 
+    geom_boxplot(position = position_dodge(width = 0.9)) +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank()) +
+    ggtitle("Distribuição de votação metada da temporada versus começo/fim (Xena)")
+
+```
+
 
 ******
 
