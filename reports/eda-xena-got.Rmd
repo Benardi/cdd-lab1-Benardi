@@ -1,11 +1,11 @@
 ---
 title: "EDA Game of Thrones (GOT) and Xena the Warrior Princess"
 output:
-  html_notebook:
-    toc: yes
-    toc_float: yes
   html_document:
     df_print: paged
+    toc: yes
+    toc_float: yes
+  html_notebook:
     toc: yes
     toc_float: yes
 ---
@@ -30,6 +30,7 @@ episodes = read_csv(here("data/series_from_imdb.csv"),
            glimpse()
 ```
 
+******
 ## Qual das séries é mais bem avaliada no IMDB? 
 
 ```{r}
@@ -63,7 +64,7 @@ episodes %>%
 * É possível notar que a quase totalidade das notas de GOT (min = 8.0) está pelo menos muito próxima do terceiro quartil de Xena (8.5). 
 * É possível perceber que a densidade de frequência (violin-plot) das notas de GOT é  mais alta em torno de entre [8.5, 9] enquanto que a densidade de frequência das notas de Xena é mais alta entre ao redor de 8.0. 
 
-Em termos de quartis e de densidade de frequência **a série _Game of Thrones_ é mais bem avaliada do que a série _Xena a Princesa Guerreira_ no IMBD**.  
+Em termos de quartis e de densidade de frequência **a série _Game of Thrones_ aparenta ser  mais bem avaliada do que a série _Xena a Princesa Guerreira_ no IMBD**.  
 
 ```{r}
 form <- function(x) c(mean = mean(x), sd = sd(x), n =length(x))
@@ -85,10 +86,11 @@ episodes %>%
 
 * Comparando a avalição média dos usúarios para Game of Thrones (9.046667) com a avaliação média de Xena (7.715672), Game of Thrones sai mais uma vez como a mais bem avaliada.
 
-* Observando as barras de erro (erro padrão da média), relativamente pequenas e suficientemente distantes uma da outra, estas não aparentam minorar o que os valores médios apontam.   
+* Observando as barras de erro (erro padrão da média), de pequeno intervalo e  suficientemente distantes uma da outra, estas não aparentam minorar o que os valores médios apontam.   
 
-Assim, tanto os valores médios como o gráfico, que inclui o erro médio, reforçam a afirmação de que **a série _Game of Thrones_ é mais bem avaliada que a série _Xena the Warrior Princess_ no IMBD**.  
+Tanto os valores médios como o gráfico de barras incluindo as barras de erro (médio em sua barra de erro (erro padrão) reforçam a afirmação de que **a série _Game of Thrones_ é mais bem avaliada que a série _Xena the Warrior Princess_ no IMBD**.  
 
+******
 ###  Muda de acordo com as temporadas da série?
 
 ```{r}
@@ -96,9 +98,18 @@ episodes %>%
   ggplot(aes(x = series_name, y = user_rating, fill=season)) +
     geom_boxplot(position = position_dodge(width = 0.9)) 
 ```
+* Em relação à distribuição das notas das avaliações de Game of Thrones ao longo de seis temporadas
+    + É visível que temporada 6 e 4 apresentam uma maior variabilidade do que em outras temporadas.  
+    + A temporada 4 tem uma concentração de notas mais altas que o resto das outras temporadas.  
+    + A avaliação mediana e o intervalo interquatil flutuam ao longo das temporadas mas aparentam permanecer relativamente próximos da nota 9 (Aparenta ser menos verdade pra temporada 4 e 5 ).   
+    
+<br></br>
 
-Existe uma certa mudança na distribuição dos valores quando consideramos temporadas distin
+* Em relação à distribuição das notas das avaliações de Xena ao longo de seis temporadas
+    + A partir da 4ª temporada em diante notas mais baixas surgem afetando o limite inferior dos boxplots. 
+    + A avaliação mediana e o intervalo interquatil flutuam ao longo das temporadas mas aparentam permanecer relativamente próximos da nota 8 (O que parece ser mais verdade para a mediana do que para o intervalo interquartil). 
 
+Quando comparamos a distribuição das notas das avaliações das temporadas dentro de uma mesma série percebemos que **o perfil das notas das avaliações muda de acordo com as temporadas da série** (e.g. as notas da série Xena refletem uma tendência de queda a partir da 4ª temporada em diante quando comparadas com a 3ª temporada).  
 ```{r}
 episodes %>% 
   ggplot(aes(x = series_name,
@@ -111,6 +122,9 @@ episodes %>%
           axis.ticks.x=element_blank())
 ```
 
+Comparando a distribuição das notas das avaliações de cada série por temporada (avaliações de GOT na temporada 1 contra Xena temporada 1) é possível notar que ao longo de todas as seis temporadas foi mantida uma mesma tendência. Em termos não só de intervalo interquatil mas também virtualmente em 100% da distribuição das notas, **em todas as seis temporadas GOT permanece com notas mais altas do que Xena**.
+
+******
 ## Qual das séries tem episódios de qualidade mais irregular segundo o IMDB?
 
 ```{r}
@@ -119,11 +133,19 @@ episodes %>%
     geom_jitter(width = 0.25) 
 ```
 
+* As notas das avaliações de GOT ocorrem desde 8 (mínimo) até 9.9 (máximo) e aparentam estar relativamente concentradas em torno de 9, o que está em acordo com resultados anteriores.
+
+* As notas das avaliações de Xena ocorrem desde 5.9 (mínimo) até 8.8 (máximo) e aparentam estar relativamente concentradas em torno de 8, o que está em acordo com resultados anteriores.
+
+**A série Xena aparenta ter notas mais irregulares do que GOT** estando dispersa em um intervalo maior [5.9, 8.8] do que GOT [8, 9.9].
+
 ```{r}
 episodes %>%
   ggplot(aes(user_rating,color=series_name)) +
     geom_density()
 ```
+
+O histograma alisado reforça a ideia de que **a série Xena tem notas mais irregulares do que GOT** pois as notas de Xena ocorrem ao longo do intervalo [5.9, 8.8] (limites  do histograma azul) enquanto as notas de GOT ocorrem ao longo do intervalo [8, 9.9](limites do histograma vermelho). Sendo a amplitude do primeiro intervalo maior do que a do segundo. Mas, além disso o histograma alisado também demonstra que de fato os ponto de maior densidade de frequência das notas é em torno de 8 para Xena e em torno de 9 para GOT.
 
 ```{r}
 episodes %>% 
@@ -144,3 +166,4 @@ episodes %>%
     facet_wrap(~ season)
 ```
 
+Avaliando a dispersão e a densidade de frequência das notas de ambas séries por temporadas é possível perceber que a dispersão das notas da série Xena aumentou sensivelmente a partir da temporada 4 em diante (passam a existir ocorrências desde em torno de 6). Esta observação está em acordo com resultados anteriores e os valores destas três temporadas são os prováveis responsavéis que tornam **as notas da série Xena mais irregulares do que as notas de GOT.**  
