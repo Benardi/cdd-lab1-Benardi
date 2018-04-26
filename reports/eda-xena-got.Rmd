@@ -18,6 +18,8 @@ theme_set(theme_bw())
 
 Analisaremos as avaliações do IMDB das séries Game of Thrones e Xena The Warrior Princess.  
 
+## Panorama dos dados
+
 ```{r}
 episodes = read_csv(here("data/series_from_imdb.csv"), 
                     progress = FALSE,
@@ -29,6 +31,55 @@ episodes = read_csv(here("data/series_from_imdb.csv"),
            filter(series_name %in% c("Game of Thrones","Xena a Princesa Guerreira")) %>%
            glimpse()
 ```
+
+### Em geral quantos votos um episódio tem em uma temporada da série?
+
+```{r}
+episodes %>% 
+    filter(series_name %in% c("Xena a Princesa Guerreira")) %>%
+    ggplot(aes(x = season_ep, y = user_votes))  + 
+    geom_line() +
+    facet_wrap(~ season) +
+    ggtitle("Distribuição de votação por episódios a cada temporada (Xena)")
+```
+
+A série Xena teve em geral centenas de votos para os episódios da série ao longo de suas seis temporadas.  
+
+```{r}
+episodes %>% 
+    filter(series_name %in% c("Game of Thrones")) %>%
+    filter(season != 6) %>%
+    ggplot(aes(x = season_ep, y = user_votes))  + 
+    geom_line() +
+    facet_wrap(~ season) + 
+    ggtitle("Distribuição de votação por episódios a cada temporada (GOT)")
+```
+
+A série GOT teve dezenas de milhares de votos para seus episódios ao longo de suas cinco primeiras temporadas.  
+
+```{r}
+episodes %>% 
+    filter(series_name %in% c("Game of Thrones")) %>%
+    filter(season == 6) %>%
+    ggplot(aes(x = season_ep, y = user_votes))  + 
+    geom_line() +
+    facet_wrap(~ season) + 
+    ggtitle("Distribuição de votação por episódios a cada temporada (GOT)")
+```
+
+Na sua sexta temporada GOT teve um aumento considerável de votos, chegando à escala de centena de milhar de votos.  
+
+### Quantos episódios cada série tem por temporada?
+
+```{r}
+episodes %>% 
+    ggplot(aes(season, fill=series_name))  + 
+    geom_bar(position="dodge") +
+    ggtitle("Número de episódios por temporada")
+
+```
+
+A série Xena tem entre 20 e 25 episódios por temporada enquanto GOT mantém o número de 10 episódios por temporada.  
 
 ******
 ## Qual das séries é mais bem avaliada no IMDB? 
