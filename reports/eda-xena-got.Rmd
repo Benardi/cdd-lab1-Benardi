@@ -290,3 +290,28 @@ filtered %>%
 Para GOT 100% das temporadas tiveram seu melhor rating no começo/fim da temporada.
 
 **Os períodos de melhor rating ficaram divididos para a série Xena e foram claramente o começo/fim da série para GOT.** 
+
+******
+
+## Qual das séries ou tem episódios mais sem graça? (Um episódio é sem graça se ninguém nem ama nem odeia ele)
+
+```{r}
+episodes = episodes %>%
+    mutate(
+        rank_odiados = row_number(r1), # maior = mais odiado
+        rank_amados = row_number(r10), # maior = mais amado
+        amado_odiado = rank_amados * rank_odiados) # maior = mais amado E odiado 
+
+episodes %>% 
+    ggplot(aes(x = series_name,
+               y = amado_odiado,
+               group=series_name,
+               color=series_name)) +
+    geom_jitter() +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())
+
+```
+
+A série Xena apresenta uma grande concentração de episódios que não foram nem amados nem odiados, amado_odiado perto de 0, como mostra claramente o gráfico de dispersão, enquanto a série GOT não possui episódios cujo valor amado_odiado esteja perto de 0. **Portanto a série Xena é a série com mais episódios sem graça.**
