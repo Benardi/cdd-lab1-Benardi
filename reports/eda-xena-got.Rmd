@@ -1,11 +1,11 @@
 ---
 title: "EDA Game of Thrones (GOT) and Xena the Warrior Princess"
 output:
-  html_document:
-    df_print: paged
+  html_notebook:
     toc: yes
     toc_float: yes
-  html_notebook:
+  html_document:
+    df_print: paged
     toc: yes
     toc_float: yes
 ---
@@ -92,11 +92,14 @@ form <- function(x) c(mean = mean(x),
                       q2 = quantile(x, 0.50),
                       q3 = quantile(x, 0.75))
 
-episodes %>% 
-          subset(select=c("user_rating", "series_name")) %>%
-          aggregate(user_rating ~ series_name, ., form) %>%
-          do.call(data.frame, .) %>%
-          setNames(c("series_name","mean","max","min","q1","q2","q3"))
+epsd_summr <- 
+    episodes %>% 
+    subset(select=c("user_rating", "series_name")) %>%
+    aggregate(user_rating ~ series_name, ., form) %>%
+    do.call(data.frame, .) %>%
+    setNames(c("series_name","mean","max","min","q1","q2","q3")) 
+
+epsd_summr
 ```
 
 ```{r}
@@ -218,3 +221,72 @@ episodes %>%
 ```
 
 Avaliando a dispersão e a densidade de frequência das notas de ambas séries por temporadas é possível perceber que a dispersão das notas da série Xena aumentou sensivelmente a partir da temporada 4 em diante (passam a existir ocorrências desde em torno de 6). Esta observação está em acordo com resultados anteriores e os valores destas três temporadas são os prováveis responsavéis que tornam **as notas da série Xena mais irregulares do que as notas de GOT.**  
+
+## Episódios no início/fim da temporada são mais bem avaliados que os no meio?
+
+Consideraremos os 20% iniciais e os 20% finais como o começo e fim de temporada, e os 60% entre essas duas parcelas como o meio de temporada. O período será considerado melhor avaliado se tiver o episódio de maior pontuação, caso haja empate será o que tiver valores mais altos mais frequentemente.   
+
+```{r}
+form <- function(x) c(mean = mean(x),
+                      max = max(x),
+                      min = min(x),
+                      q1 = quantile(x, 0.25), 
+                      q2 = quantile(x, 0.50),
+                      q3 = quantile(x, 0.75))
+
+epsd_summr <- 
+    episodes %>% 
+    subset(select=c("season_ep", "season","series_name")) %>%
+    aggregate(season_ep ~ series_name+season, ., form) %>%
+    do.call(data.frame, .) %>%
+    setNames(c("series","seasn","mean","max","min","q1","q2","q3")) 
+
+epsd_summr
+```
+
+```{r}
+filtered <- episodes %>%
+    filter(series_name %in% c("Xena a Princesa Guerreira"))
+
+filtered %>%
+    ggplot(aes(x = season_ep, y = user_rating, color = series_name)) +
+    geom_vline(xintercept = quantile(filtered$season_ep, 0.2),
+    color = "blue") +
+    geom_vline(xintercept = quantile(filtered$season_ep, 0.8),
+    color = "blue") +
+    geom_line() + facet_wrap(~ season)
+```
+* Temporada 1: Maior rating foi no meio da temporada
+* Temporada 2: Maior rating foi no meio da temporada
+* Temporada 3: Maior rating foi no meio da temporada
+* Temporada 4: Maior rating foi no fim da temporada
+* Temporada 5: Maior rating foi no fim da temporada
+* Temporada 6: Maior rating foi no começo da temporada
+
+Para Xena 50% das temporadas tiveram seu melhor rating no meio da temporada e 50% tiveram seu melhor rating no começo/fim da temporada.
+
+```{r}
+
+filtered <- episodes %>%
+    filter(series_name %in% c("Game of Thrones"))
+
+filtered %>%
+    ggplot(aes(x = season_ep, y = user_rating, color = series_name)) +
+    geom_vline(xintercept = quantile(filtered$season_ep, 0.2),
+    color = "blue") +
+    geom_vline(xintercept = quantile(filtered$season_ep, 0.80),
+    color = "blue") +
+    geom_line() + facet_wrap(~ season)
+```
+
+* Temporada 1: Maior rating foi no fim da temporada
+* Temporada 2: Maior rating foi no fim da temporada
+* Temporada 3: Maior rating foi no fim da temporada
+* Temporada 4: Maior rating foi no fim da temporada 
+    + (Rating de nível ocorreu duas vezes próximo do começo/fim e meio da temporada representou caída)
+* Temporada 5: Maior rating foi no fim da temporada
+* Temporada 6: Maior rating foi no fim da temporada
+
+Para GOT 100% das temporadas tiveram seu melhor rating no começo/fim da temporada.
+
+**Os períodos de melhor rating ficaram divididos para a série Xena e foram claramente o começo/fim da série para GOT.** 
