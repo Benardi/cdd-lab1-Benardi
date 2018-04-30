@@ -1,21 +1,24 @@
 ---
 title: "EDA LAB 1 - Checkpoint 3"
 output:
+  html_notebook:
+    toc: yes
+    toc_float: yes
   html_document:
     df_print: paged
     toc: yes
     toc_float: yes
-  html_notebook:
-    toc: yes
-    toc_float: yes
 ---
+
+## Conjunto de dados utilizado
+
+Análise exploratória de dados do [IMDB](https://www.imdb.com/)  sobre seriados de TV e Streaming. Os dados originais e as variáveis vem [dneste repositorio](https://github.com/nazareno/imdb-series) . Lá tem a explicação de como os dados foram gerados e do significado de cada variável.
 
 ```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
 library(tidyverse)
 library(here)
 theme_set(theme_bw())
 ```
-
 
 
 ```{r}
@@ -29,3 +32,16 @@ episodes <- read_csv(here("data/series_from_imdb.csv"),
 episodes %>% 
     glimpse()
 ```
+
+## Data Overview
+
+```{r}
+episodes %>%
+    mutate(season = as.numeric(season)) %>%
+    group_by(series_name) %>%
+    summarise(n_seasons = max(season)) %>%
+    ggplot(aes(n_seasons)) +
+    geom_bar()
+```
+
+
