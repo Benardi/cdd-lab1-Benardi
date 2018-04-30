@@ -28,7 +28,9 @@ episodes = read_csv(here("data/series_from_imdb.csv"),
                                      episode = col_character(), 
                                      url = col_character(),
                                      season = col_character())) %>% 
-           filter(series_name %in% c("Game of Thrones","Xena a Princesa Guerreira")) %>%
+           filter(series_name %in% c("Game of Thrones","Xena a Princesa Guerreira")) 
+
+episodes %>%
            glimpse()
 ```
 
@@ -45,6 +47,8 @@ episodes %>%
 
 A série Xena teve em geral centenas de votos para os episódios da série ao longo de suas seis temporadas.  
 
+>> E diminuiu das 1as para as últimas...
+
 ```{r}
 episodes %>% 
     filter(series_name %in% c("Game of Thrones")) %>%
@@ -57,6 +61,8 @@ episodes %>%
 
 A série GOT teve dezenas de milhares de votos para seus episódios ao longo de suas cinco primeiras temporadas.  
 
+>> Além disso, tem alguns poucos episódios com muito mais avaliações do que outros, né? É importante comentar esses pontos.
+
 ```{r}
 episodes %>% 
     filter(series_name %in% c("Game of Thrones")) %>%
@@ -67,7 +73,7 @@ episodes %>%
     ggtitle("Distribuição de votação por episódios a cada temporada (GOT)")
 ```
 
-Na sua sexta temporada GOT teve um aumento considerável de votos, chegando à escala de centena de milhar de votos.  
+Na sua sexta temporada GOT teve um aumento considerável de votos, chegando à escala de centena de milhares de votos.  
 
 ### Quantos episódios cada série tem por temporada?
 
@@ -83,6 +89,8 @@ A série Xena tem entre 20 e 25 episódios por temporada enquanto GOT mantém o 
 
 ******
 ## Qual das séries é mais bem avaliada no IMDB? 
+
+>> a sintaxe do do.call abaixo é meio convoluta e frágil. tenta mudar ela por verbos dplyr. vê meu exemplo no final do chunk, e substitui teu uso de do.call por essa sintaxe no restante do relatório.
 
 ```{r}
 form <- function(x) c(mean = mean(x),
@@ -100,6 +108,19 @@ epsd_summr <-
     setNames(c("series_name","mean","max","min","q1","q2","q3")) 
 
 epsd_summr
+
+sumario_simples <- episodes %>% 
+    select(user_rating, series_name) %>%
+    group_by(series_name) %>% 
+    summarise(
+        mean = mean(user_rating),
+        max = max(user_rating),
+        min = min(user_rating),
+        q1 = quantile(user_rating, 0.25), 
+        q2 = quantile(user_rating, 0.50),
+        q3 = quantile(user_rating, 0.75)
+    )
+
 ```
 
 ```{r}
@@ -118,7 +139,7 @@ episodes %>%
 * É possível notar que a quase totalidade das notas de GOT (min = 8.0) está pelo menos muito próxima do terceiro quartil de Xena (8.5). 
 * É possível perceber que a densidade de frequência (violin-plot) das notas de GOT é  mais alta em torno de entre [8.5, 9] enquanto que a densidade de frequência das notas de Xena é mais alta entre ao redor de 8.0. 
 
-Em termos de quartis e de densidade de frequência **a série _Game of Thrones_ aparenta ser  mais bem avaliada do que a série _Xena a Princesa Guerreira_ no IMBD**.  
+Em termos de quartis e de densidade de frequência **a série _Game of Thrones_ é mais bem avaliada do que a série _Xena a Princesa Guerreira_ no IMBD**.  
 
 ```{r}
 form <- function(x) c(mean = mean(x), sd = sd(x), n =length(x))
@@ -144,12 +165,14 @@ episodes %>%
 
 Tanto os valores médios como o gráfico de barras incluindo as barras de erro (médio em sua barra de erro (erro padrão) reforçam a afirmação de que **a série _Game of Thrones_ é mais bem avaliada que a série _Xena the Warrior Princess_ no IMBD**.  
 
+>> Repara que como temos todos os dados (a população) dos episódios aqui, não precisamos de inferência estatística para estimar onde está a média da população. Isso seria necessário se estivéssemos estimando user_rating de cada episódio, mas na verdade nem sabemos como essa métrica é calculada. 
+
 ******
 ###  Muda de acordo com as temporadas da série?
 
 ```{r}
 episodes %>% 
-  ggplot(aes(x = series_name, y = user_rating, fill=season)) +
+  ggplot(aes(x = series_name, y = user_rating, fill=as.numeric(season))) +
     geom_boxplot(position = position_dodge(width = 0.9)) 
 ```
 * Em relação à distribuição das notas das avaliações de Game of Thrones ao longo de seis temporadas
@@ -246,6 +269,8 @@ epsd_summr <-
 epsd_summr
 ```
 
+>> para ficar na sintaxe/gramática dplyr, substitui merge por left_join, e rowwise por group_by
+
 ```{r}
 episodes <- merge(episodes, epsd_summr) %>% 
     rowwise() %>%
@@ -273,6 +298,9 @@ filtered %>%
     color = "blue") +
     geom_line() + facet_wrap(~ season)
 ```
+
+>> Essa lista abaixo tem a maior cara de algo que podia ter sido automatizado, criando uma coluna que diz onde foi o maior rating. Ainda mais na hora de contar quantos % caíram em cada categoria.
+
 * Temporada 1: Maior rating foi no meio da temporada
 * Temporada 2: Maior rating foi no meio da temporada
 * Temporada 3: Maior rating foi no meio da temporada
