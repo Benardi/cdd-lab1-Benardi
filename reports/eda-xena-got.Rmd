@@ -1,5 +1,6 @@
 ---
 title: "EDA Game of Thrones (GOT) and Xena the Warrior Princess"
+author: "José Benardi de Souza Nunes"
 output:
   html_document:
     df_print: paged
@@ -16,7 +17,19 @@ library(here)
 theme_set(theme_bw())
 ```
 
-Analisaremos as avaliações do IMDB das séries Game of Thrones e Xena The Warrior Princess.  
+*******
+
+## Conjunto de dados utilizado
+
+Análise exploratória de dados do [IMDB](https://www.imdb.com/)  sobre seriados de TV e Streaming. Os dados originais e as variáveis vêm [deste repositorio](https://github.com/nazareno/imdb-series) . Lá consta a explicação de como os dados foram gerados e do significado de cada variável.
+
+## Conjunto de dados de análise
+Diante do conjunto de dados coletados, analisaremos as avaliações do IMDB das seguintes séries:
+
+* Game of Thrones 
+* Xena The Warrior Princess  
+
+*******
 
 ## Panorama dos dados
 
@@ -28,7 +41,9 @@ episodes = read_csv(here("data/series_from_imdb.csv"),
                                      episode = col_character(), 
                                      url = col_character(),
                                      season = col_character())) %>% 
-           filter(series_name %in% c("Game of Thrones","Xena a Princesa Guerreira")) %>%
+           filter(series_name %in% c("Game of Thrones","Xena a Princesa Guerreira")) 
+
+episodes %>%
            glimpse()
 ```
 
@@ -56,6 +71,7 @@ episodes %>%
 ```
 
 A série GOT teve dezenas de milhares de votos para seus episódios ao longo de suas cinco primeiras temporadas.  
+Além disso, tem alguns poucos episódios com muito mais avaliações do que outros.
 
 ```{r}
 episodes %>% 
@@ -67,7 +83,7 @@ episodes %>%
     ggtitle("Distribuição de votação por episódios a cada temporada (GOT)")
 ```
 
-Na sua sexta temporada GOT teve um aumento considerável de votos, chegando à escala de centena de milhar de votos.  
+Na sua sexta temporada GOT teve um aumento considerável de votos, chegando à escala de centena de milhares de votos.  
 
 ### Quantos episódios cada série tem por temporada?
 
@@ -85,21 +101,21 @@ A série Xena tem entre 20 e 25 episódios por temporada enquanto GOT mantém o 
 ## Qual das séries é mais bem avaliada no IMDB? 
 
 ```{r}
-form <- function(x) c(mean = mean(x),
-                      max = max(x),
-                      min = min(x),
-                      q1 = quantile(x, 0.25), 
-                      q2 = quantile(x, 0.50),
-                      q3 = quantile(x, 0.75))
+sumario_simples <- episodes %>%
+    select(user_rating, series_name) %>%
+    group_by(series_name) %>%
+    summarise(
+        mean = mean(user_rating),
+        max = max(user_rating),
+        min = min(user_rating),
+        q1 = quantile(user_rating, 0.25),
+        q2 = quantile(user_rating, 0.50),
+        q3 = quantile(user_rating, 0.75)
+    ) 
 
-epsd_summr <- 
-    episodes %>% 
-    subset(select=c("user_rating", "series_name")) %>%
-    aggregate(user_rating ~ series_name, ., form) %>%
-    do.call(data.frame, .) %>%
-    setNames(c("series_name","mean","max","min","q1","q2","q3")) 
+sumario_simples
 
-epsd_summr
+
 ```
 
 ```{r}
@@ -114,7 +130,6 @@ episodes %>%
           axis.text.x=element_blank(),
           axis.ticks.x=element_blank())
 ```
-
 * As notas de GOT são em geral mais altas que as de Xena, o que é refletido no gráfico pelo fato de que tanto o diagrama de caixa como o diagrama de violino vermelho (GOT) estarem acima dos diagrama de violino e caixa azuis (Xena). 
 
 * As notas mais frequentes de  GOT estão entre [8.5, 9] (parte mais larga do violino vermelho) enquanto as notas mais frequentes de Xena estão em torno de 8.0 (parte mais larga do violino azul). 
@@ -122,19 +137,20 @@ episodes %>%
 **A série _Game of Thrones_ aparenta ser  mais bem avaliada do que a série _Xena a Princesa Guerreira_ no IMBD**.  
 
 ```{r}
-form <- function(x) c(mean = mean(x), sd = sd(x), n =length(x))
-
 episodes %>% 
-    aggregate(user_rating ~ series_name, ., form) %>%
-    do.call(data.frame, .) %>%
-    mutate(se = user_rating.sd/sqrt(user_rating.n)) %>%
-    setNames(c("series_name","mean","sd","n","se")) %>% 
-    ggplot(aes(series_name,mean, fill = series_name)) + 
-    geom_bar(stat='identity') + 
+    group_by(series_name) %>%
+    summarise(
+        mean = mean(user_rating),
+        sd = sd(user_rating),
+        n = n()
+    ) %>%
+    mutate(se = sd/sqrt(n)) %>%
+    ggplot(aes(series_name,mean, fill = series_name)) +
+    geom_bar(stat='identity') +
     geom_errorbar(aes(width= 0.25,
                       ymax = mean + se,
                       ymin = mean - se)) +
-    scale_fill_discrete(name = "Série") + 
+    scale_fill_discrete(name = "Série") +
     scale_y_continuous(limits = c(0,10)) +
     labs(y = "mean user_rating")
 ```
@@ -148,7 +164,7 @@ A média das notas também sugere que a série _Game of Thrones_ **é mais bem a
 
 ```{r}
 episodes %>% 
-  ggplot(aes(x = series_name, y = user_rating, fill=season)) +
+  ggplot(aes(x = series_name, y = user_rating, fill=as.numeric(season))) +
     geom_boxplot(position = position_dodge(width = 0.9)) 
 ```
 
@@ -252,34 +268,28 @@ A série Xena apresenta uma grande concentração de episódios que não foram n
 Consideraremos os 20% iniciais e os 20% finais como o começo e fim de temporada, e os 60% entre essas duas parcelas como o meio de temporada. Um episódio será de metade de temporada se estiver incluido nesses 60%.
 
 ```{r}
-form <- function(x) c(mean = mean(x),
-                      max = max(x),
-                      min = min(x),
-                      n =length(x))
 
-epsd_summr <- 
+
+
+sumario_simples <- 
     episodes %>% 
-    subset(select=c("season_ep",
-                    "season",
-                    "series_name")) %>%
-    aggregate(season_ep ~ series_name+season, ., form) %>%
-    do.call(data.frame, .) %>%
-    setNames(c("series_name",
-               "season","mean",
-               "max","min","n")) %>%
-    rowwise() %>%
-    mutate(p20 = quantile(seq(from=1, to=n, by=1), 0.20), ## Separa os 20% iniciais
-           p80 = quantile(seq(from=1, to=n, by=1), 0.80)) ## Separa os 20% finais
+    select(season_ep,season,series_name) %>%
+    group_by(series_name,season) %>% 
+    summarise(n = n(),
+               p20 = quantile(seq(from=1, to=n, by=1), 0.20),
+               p80 = quantile(seq(from=1, to=n, by=1), 0.80))
 
-episodes <- merge(episodes, epsd_summr) %>% 
-    rowwise() %>%
-    mutate(middle_eps = (season_ep > p20) & ## Classifica em metade da série ou não
-               (season_ep < p80)) 
-episodes %>%
-    subset(select=c("series_name",
-                    "season_ep",
-                    "p20","p80",
-                    "middle_eps"))
+sumario_simples
+```
+
+```{r}
+episodes <- left_join(episodes, sumario_simples,
+                      by = c("series_name", "season")) %>% 
+    group_by(series_name, season) %>%
+    mutate(middle_eps = (season_ep > p20) &
+               (season_ep < p80)) %>% 
+    ungroup()
+episodes
 ```
 
 <br></br>
@@ -367,4 +377,3 @@ Para a série GOT:
 * Nas temporadas 1,2,3,4 e 6  os episódios de começo/fim (boxplots vermelhos) são mais bem avaliados.
 
 Levando em consideração o que foi visto tanto em Xena como em GOT **em termos de temporada os episódios começo/fim tendem a ser mais bem avaliados que os episódios de metade de temporada**.
-
