@@ -1,11 +1,12 @@
 ---
 title: "EDA Game of Thrones (GOT) and Xena the Warrior Princess"
+author: "José Benardi de Souza Nunes"
 output:
-  html_notebook:
-    toc: yes
-    toc_float: yes
   html_document:
     df_print: paged
+    toc: yes
+    toc_float: yes
+  html_notebook:
     toc: yes
     toc_float: yes
 ---
@@ -16,7 +17,19 @@ library(here)
 theme_set(theme_bw())
 ```
 
-Analisaremos as avaliações do IMDB das séries Game of Thrones e Xena The Warrior Princess.  
+*******
+
+## Conjunto de dados utilizado
+
+Análise exploratória de dados do [IMDB](https://www.imdb.com/)  sobre seriados de TV e Streaming. Os dados originais e as variáveis vêm [deste repositorio](https://github.com/nazareno/imdb-series) . Lá consta a explicação de como os dados foram gerados e do significado de cada variável.
+
+## Conjunto de dados de análise
+Diante do conjunto de dados coletados, analisaremos as avaliações do IMDB das seguintes séries:
+
+* Game of Thrones 
+* Xena The Warrior Princess  
+
+*******
 
 ## Panorama dos dados
 
@@ -46,7 +59,6 @@ episodes %>%
 ```
 
 A série Xena teve em geral centenas de votos para os episódios da série ao longo de suas seis temporadas.  
-A quantidade de votos diminui progressivamente das primeiras temporadas para as últimas
 
 ```{r}
 episodes %>% 
@@ -103,6 +115,7 @@ sumario_simples <- episodes %>%
 
 sumario_simples
 
+
 ```
 
 ```{r}
@@ -117,11 +130,11 @@ episodes %>%
           axis.text.x=element_blank(),
           axis.ticks.x=element_blank())
 ```
-*  Em especial em termos de mediana GOT está bem acima com seus 8.95 contra os 7.80 de Xena.
-* É possível notar que a quase totalidade das notas de GOT (min = 8.0) está pelo menos muito próxima do terceiro quartil de Xena (8.5). 
-* É possível perceber que a densidade de frequência (violin-plot) das notas de GOT é  mais alta em torno de entre [8.5, 9] enquanto que a densidade de frequência das notas de Xena é mais alta entre ao redor de 8.0. 
+* As notas de GOT são em geral mais altas que as de Xena, o que é refletido no gráfico pelo fato de que tanto o diagrama de caixa como o diagrama de violino vermelho (GOT) estarem acima dos diagrama de violino e caixa azuis (Xena). 
 
-Em termos de quartis e de densidade de frequência **a série _Game of Thrones_ é mais bem avaliada do que a série _Xena a Princesa Guerreira_ no IMBD**.  
+* As notas mais frequentes de  GOT estão entre [8.5, 9] (parte mais larga do violino vermelho) enquanto as notas mais frequentes de Xena estão em torno de 8.0 (parte mais larga do violino azul). 
+
+**A série _Game of Thrones_ aparenta ser  mais bem avaliada do que a série _Xena a Princesa Guerreira_ no IMBD**.  
 
 ```{r}
 episodes %>% 
@@ -142,13 +155,9 @@ episodes %>%
     labs(y = "mean user_rating")
 ```
 
-* Comparando a avalição média dos usúarios para Game of Thrones (9.046667) com a avaliação média de Xena (7.715672), Game of Thrones sai mais uma vez como a mais bem avaliada.
+* Pela altura das barras (média das notas) é observável que a média da nota de GOT é mais alta do que a média das notas de Xena.
 
-* Observando as barras de erro (erro padrão da média), de pequeno intervalo e  suficientemente distantes uma da outra, estas não aparentam minorar o que os valores médios apontam.   
-
-Tanto os valores médios como o gráfico de barras incluindo as barras de erro (médio em sua barra de erro (erro padrão) reforçam a afirmação de que **a série _Game of Thrones_ é mais bem avaliada que a série _Xena the Warrior Princess_ no IMBD**.  
-
->> Repara que como temos todos os dados (a população) dos episódios aqui, não precisamos de inferência estatística para estimar onde está a média da população. Isso seria necessário se estivéssemos estimando user_rating de cada episódio, mas na verdade nem sabemos como essa métrica é calculada. 
+A média das notas também sugere que a série _Game of Thrones_ **é mais bem avaliada** que a série _Xena the Warrior Princess_ no IMBD, a diferença aparenta ser de 1 ponto e em termos de notas de séries essa **diferença é grande**.  
 
 ******
 ###  Muda de acordo com as temporadas da série?
@@ -158,18 +167,11 @@ episodes %>%
   ggplot(aes(x = series_name, y = user_rating, fill=as.numeric(season))) +
     geom_boxplot(position = position_dodge(width = 0.9)) 
 ```
-* Em relação à distribuição das notas das avaliações de Game of Thrones ao longo de seis temporadas
-    + É visível que temporada 6 e 4 apresentam uma maior variabilidade do que em outras temporadas.  
-    + A temporada 4 tem uma concentração de notas mais altas que o resto das outras temporadas.  
-    + A avaliação mediana e o intervalo interquatil flutuam ao longo das temporadas mas aparentam permanecer relativamente próximos da nota 9 (Aparenta ser menos verdade pra temporada 4 e 5 ).   
-    
-<br></br>
 
-* Em relação à distribuição das notas das avaliações de Xena ao longo de seis temporadas
-    + A partir da 4ª temporada em diante notas mais baixas surgem afetando o limite inferior dos boxplots. 
-    + A avaliação mediana e o intervalo interquatil flutuam ao longo das temporadas mas aparentam permanecer relativamente próximos da nota 8 (O que parece ser mais verdade para a mediana do que para o intervalo interquartil). 
+A _nota mediana/barra central da caixa_ **valor que dividide os outros valores em 50% menores e 50% maiores** e o _intervalo interquatil/caixa_ **que representa 50% dos valores** flutuam ao longo das temporadas mas aparentam permanecer relativamente próximos da nota 9 para GOT e próximos de 8 para Xena.  
 
-Quando comparamos a distribuição das notas das avaliações das temporadas dentro de uma mesma série percebemos que **o perfil das notas das avaliações muda de acordo com as temporadas da série** (e.g. as notas da série Xena refletem uma tendência de queda a partir da 4ª temporada em diante quando comparadas com a 3ª temporada).  
+Quando comparamos a distribuição das notas  ao longo das temporadas percebemos que **as notas são afetadas pela mudança de temporada** (e.g. as notas da série Xena refletem uma tendência de queda a partir da 4ª temporada em diante, mínimos indo de 7 para 6).  
+
 ```{r}
 episodes %>% 
   ggplot(aes(x = series_name,
@@ -182,7 +184,11 @@ episodes %>%
           axis.ticks.x=element_blank())
 ```
 
-Comparando a distribuição das notas das avaliações de cada série por temporada (avaliações de GOT na temporada 1 contra Xena temporada 1) é possível notar que ao longo de todas as seis temporadas foi mantida uma mesma tendência. Em termos não só de intervalo interquatil mas também virtualmente em 100% da distribuição das notas, **em todas as seis temporadas GOT permanece com notas mais altas do que Xena**.
+Comparando a distribuição das notas das avaliações de cada série por temporada (notas da 1ª temporada de GOT com as notas da 1ª temporada de Xena) é possível notar que ao longo de todas as seis temporadas foi mantida uma mesma tendência. Observando a distribuição das notas através do intervalo interquatil/caixa, é possível notar que **em todas as seis temporadas GOT permanece com notas mais altas do que Xena** (A caixa de GOT está sempre acima da caixa de Xena).  
+
+<br></br>
+
+As notas das séries variam com a temporada mas para efeito de comparação, de uma série com outra, mantém-se uma nota maior de GOT em relação a Xena.  
 
 ******
 ## Qual das séries tem episódios de qualidade mais irregular segundo o IMDB?
@@ -193,9 +199,9 @@ episodes %>%
     geom_jitter(width = 0.25) 
 ```
 
-* As notas das avaliações de GOT ocorrem desde 8 (mínimo) até 9.9 (máximo) e aparentam estar relativamente concentradas em torno de 9, o que está em acordo com resultados anteriores.
+* As notas de GOT vão de **8 (mínimo) até 9.9 (máximo)** e aparentam estar relativamente concentradas em torno de 9, o que está em acordo com resultados anteriores.
 
-* As notas das avaliações de Xena ocorrem desde 5.9 (mínimo) até 8.8 (máximo) e aparentam estar relativamente concentradas em torno de 8, o que está em acordo com resultados anteriores.
+* As notas de Xena vão de **5.9 (mínimo) até 8.8 (máximo)** e aparentam estar relativamente concentradas em torno de 8, o que está em acordo com resultados anteriores.
 
 **A série Xena aparenta ter notas mais irregulares do que GOT** estando dispersa em um intervalo maior [5.9, 8.8] do que GOT [8, 9.9].
 
@@ -205,7 +211,7 @@ episodes %>%
     geom_density()
 ```
 
-O histograma alisado reforça a ideia de que **a série Xena tem notas mais irregulares do que GOT** pois as notas de Xena ocorrem ao longo do intervalo [5.9, 8.8] (limites  do histograma azul) enquanto as notas de GOT ocorrem ao longo do intervalo [8, 9.9](limites do histograma vermelho). Sendo a amplitude do primeiro intervalo maior do que a do segundo. Mas, além disso o histograma alisado também demonstra que de fato os ponto de maior densidade de frequência das notas é em torno de 8 para Xena e em torno de 9 para GOT.
+O histograma alisado reforça a ideia de que **a série Xena tem notas mais irregulares do que GOT** pois as notas de Xena ocorrem ao longo do intervalo [5.9, 8.8] (começo e fim do histograma azul) enquanto as notas de GOT ocorrem ao longo do intervalo [8, 9.9](começo e fim do histograma vermelho). Além disso o pico do histograma alisado (moda ou valor mais frequente) é em torno de 8 para Xena e em torno de 9 para GOT.
 
 ```{r}
 episodes %>% 
@@ -226,128 +232,16 @@ episodes %>%
     facet_wrap(~ season)
 ```
 
-Avaliando a dispersão e a densidade de frequência das notas de ambas séries por temporadas é possível perceber que a dispersão das notas da série Xena aumentou sensivelmente a partir da temporada 4 em diante (passam a existir ocorrências desde em torno de 6). Esta observação está em acordo com resultados anteriores e os valores destas três temporadas são os prováveis responsavéis que tornam **as notas da série Xena mais irregulares do que as notas de GOT.**  
+Olhando o diagrama de caixa e o histograma alisado das  séries ao longo de temporadas é possível perceber que as notas da série Xena ficaram mais dispersas a partir da temporada 4 em diante pois passam a existir pontos desde em torno de 6 (pontos do gráfico ficam mais separados e histograma fica mais comprido).   
 
-## Episódios no início/fim da temporada são mais bem avaliados que os no meio?
-
-Consideraremos os 20% iniciais e os 20% finais como o começo e fim de temporada, e os 60% entre essas duas parcelas como o meio de temporada. O período será considerado melhor avaliado se tiver o episódio de maior pontuação, caso haja empate será o que tiver valores mais altos mais frequentemente.   
-
-```{r}
-
-sumario_simples <- 
-    episodes %>% 
-    select(season_ep,season,series_name) %>%
-    group_by(series_name,season) %>% 
-    summarise(n = n(),
-               p20 = quantile(seq(from=1, to=n, by=1), 0.20),
-               p80 = quantile(seq(from=1, to=n, by=1), 0.80))
-
-sumario_simples
-```
-
-```{r}
-episodes <- left_join(episodes, sumario_simples,
-                      by = c("series_name", "season", "n", "p20", "p80")) %>% 
-    group_by(series_name, season) %>%
-    mutate(middle_eps = (season_ep > p20) &
-               (season_ep < p80)) 
-episodes
-```
-
-
-```{r}
-episodes %>% 
-  ggplot(aes(x = middle_eps, y = user_rating)) + 
-    geom_jitter(width = 0.25) 
-```
-
-```{r}
-filtered <- episodes %>%
-    filter(series_name %in% c("Xena a Princesa Guerreira"))
-
-filtered %>%
-    ggplot(aes(x = season_ep, y = user_rating, color = series_name)) +
-    geom_vline(xintercept = quantile(filtered$season_ep, 0.2),
-    color = "blue") +
-    geom_vline(xintercept = quantile(filtered$season_ep, 0.8),
-    color = "blue") +
-    geom_line() + facet_wrap(~ season)
-```
-
->> Essa lista abaixo tem a maior cara de algo que podia ter sido automatizado, criando uma coluna que diz onde foi o maior rating. Ainda mais na hora de contar quantos % caíram em cada categoria.
-
-* Temporada 1: Maior rating foi no meio da temporada
-* Temporada 2: Maior rating foi no meio da temporada
-* Temporada 3: Maior rating foi no meio da temporada
-* Temporada 4: Maior rating foi no fim da temporada
-* Temporada 5: Maior rating foi no fim da temporada
-* Temporada 6: Maior rating foi no começo da temporada
-
-Para Xena 50% das temporadas tiveram seu melhor rating no meio da temporada e 50% tiveram seu melhor rating no começo/fim da temporada.
-
-```{r}
-episodes %>% 
-  filter(series_name %in% c("Xena a Princesa Guerreira")) %>%
-  ggplot(aes(x = middle_eps,
-             y = user_rating,
-             color = middle_eps)) + 
-    facet_wrap(~ season) + 
-    geom_boxplot(position = position_dodge(width = 0.9)) +
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank()) +
-    ggtitle("Distribuição de votação metada da temporada versus começo/fim (Xena)")
-```
-
-
-```{r}
-
-filtered <- episodes %>%
-    filter(series_name %in% c("Game of Thrones"))
-
-filtered %>%
-    ggplot(aes(x = season_ep, y = user_rating, color = series_name)) +
-    geom_vline(xintercept = quantile(filtered$season_ep, 0.2),
-    color = "blue") +
-    geom_vline(xintercept = quantile(filtered$season_ep, 0.80),
-    color = "blue") +
-    geom_line() + facet_wrap(~ season)
-```
-
-* Temporada 1: Maior rating foi no fim da temporada
-* Temporada 2: Maior rating foi no fim da temporada
-* Temporada 3: Maior rating foi no fim da temporada
-* Temporada 4: Maior rating foi no fim da temporada 
-    + (Rating de nível ocorreu duas vezes próximo do começo/fim e meio da temporada representou caída)
-* Temporada 5: Maior rating foi no fim da temporada
-* Temporada 6: Maior rating foi no fim da temporada
-
-Para GOT 100% das temporadas tiveram seu melhor rating no começo/fim da temporada.
-
-**Os períodos de melhor rating ficaram divididos para a série Xena e foram claramente o começo/fim da série para GOT.** 
-
-```{r}
-episodes %>% 
-    filter(series_name %in% c("Game of Thrones")) %>%
-    ggplot(aes(x = middle_eps,
-             y = user_rating,
-             color = middle_eps)) + 
-    facet_wrap(~ season) + 
-    geom_boxplot(position = position_dodge(width = 0.9)) +
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank()) +
-    ggtitle("Distribuição de votação metada da temporada versus começo/fim (Xena)")
-
-```
-
+**As notas da série Xena são mais irregulares do que as notas de GOT e a diferença é grande**, com as notas de Xena indo de 6 até 9 enquanto as notas de GOT vão de 8 até 10.   
 
 ******
 
-## Qual das séries ou tem episódios mais sem graça? (Um episódio é sem graça se ninguém nem ama nem odeia ele)
+## Qual das séries tem episódios mais sem graça? (Um episódio é sem graça se ninguém nem ama nem odeia ele)
 
 ```{r}
-episodes = episodes %>%
+episodes <- episodes %>%
     mutate(
         rank_odiados = row_number(r1), # maior = mais odiado
         rank_amados = row_number(r10), # maior = mais amado
@@ -366,3 +260,120 @@ episodes %>%
 ```
 
 A série Xena apresenta uma grande concentração de episódios que não foram nem amados nem odiados, amado_odiado perto de 0, como mostra claramente o gráfico de dispersão, enquanto a série GOT não possui episódios cujo valor amado_odiado esteja perto de 0. **Portanto a série Xena é a série com mais episódios sem graça.**
+
+******
+
+## Episódios no início/fim da temporada são mais bem avaliados que os no meio?
+
+Consideraremos os 20% iniciais e os 20% finais como o começo e fim de temporada, e os 60% entre essas duas parcelas como o meio de temporada. Um episódio será de metade de temporada se estiver incluido nesses 60%.
+
+```{r}
+
+
+
+sumario_simples <- 
+    episodes %>% 
+    select(season_ep,season,series_name) %>%
+    group_by(series_name,season) %>% 
+    summarise(n = n(),
+               p20 = quantile(seq(from=1, to=n, by=1), 0.20),
+               p80 = quantile(seq(from=1, to=n, by=1), 0.80))
+
+sumario_simples
+```
+
+```{r}
+episodes <- left_join(episodes, sumario_simples,
+                      by = c("series_name", "season")) %>% 
+    group_by(series_name, season) %>%
+    mutate(middle_eps = (season_ep > p20) &
+               (season_ep < p80)) %>% 
+    ungroup()
+episodes
+```
+
+<br></br>
+
+Geramos a informação **_middle_eps_** para representar se uma série é ou não do meio da temporada, está entre os 20% episódios inicias e finais da temporada (no meio). Se **_middle_eps_** é TRUE o episódio é da metade da temporada, se **_middle_eps_** é FALSE o episódio é do começo/fim da temporada.  
+
+```{r}
+
+filtered <- episodes %>%
+    filter(series_name %in% c("Xena a Princesa Guerreira")) %>%
+    filter(season == 4)
+
+filtered %>%
+    ggplot(aes(x = season_ep, y = user_rating, color = series_name)) +
+    geom_vline(xintercept = filtered$p20,
+    color = "blue") +
+    geom_vline(xintercept = filtered$p80,
+    color = "blue") +
+    geom_line()
+```
+
+Usando a 4ª temporada da série Xena como exemplo os episódios da metade de temporada seriam aqueles entre as barras azuis (20º percentil e 80º percentil, os quais dividem os valores em 20%-80% e 80%-20% respectivamente e assim o que está entre eles é 60% do total).
+
+```{r}
+episodes %>% 
+  ggplot(aes(user_rating, color=middle_eps)) + 
+    geom_density()
+```
+
+As formas dos histogramas alisados são semelhantes, e o pico de ambos (moda ou valor mais frequente) coincide na nota 8, isso sugere que **sem distinguir as séries umas das outras os episódios no início/fim da temporada são avaliados semelhantemente aos que estão no meio da série**.  
+
+### Muda de acordo com série?
+
+```{r}
+episodes %>% 
+  ggplot(aes(x = series_name, y = user_rating, color=middle_eps)) + 
+    geom_point(position = position_jitterdodge(dodge.width=0.9)) +
+    geom_boxplot(position = "dodge") 
+
+```
+
+Distiguindo as séries é possível notar que os boxplots azuis (que representam os episódios da metade da temporada) estão em geral abaixo dos boxplots vermelhos (que representam os episódios do começo/fim) da temporada. **Assim, em termos de séries os episódios do começo/fim de temporada são mais bem avaliados.**  
+
+### Muda de acordo com temporada?
+
+```{r}
+episodes %>% 
+  filter(series_name %in% c("Xena a Princesa Guerreira")) %>%
+  ggplot(aes(x = middle_eps,
+             y = user_rating,
+             color = middle_eps)) + 
+    facet_wrap(~ season) + 
+    geom_boxplot(position = position_dodge(width = 0.9)) +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank()) +
+    ggtitle("Distribuição de votação metade da temporada versus começo/fim (Xena)")
+```
+
+Para  a série Xena: 
+
+* Nas temporadas 5 e 6 os episódios de começo/fim de temporada foram mais bem votados
+
+* Na temporada 1,2,3 e 4 a diferença fica menos clara.  
+
+```{r}
+episodes %>% 
+    filter(series_name %in% c("Game of Thrones")) %>%
+    ggplot(aes(x = middle_eps,
+             y = user_rating,
+             color = middle_eps)) + 
+    facet_wrap(~ season) + 
+    geom_boxplot(position = position_dodge(width = 0.9)) +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank()) +
+    ggtitle("Distribuição de votação metada da temporada versus começo/fim (GOT)")
+
+```
+
+Para a série GOT:
+ 
+* Na 5ª temporada episodios do começo/fim e metade se comportam de maneira similar
+
+* Nas temporadas 1,2,3,4 e 6  os episódios de começo/fim (boxplots vermelhos) são mais bem avaliados.
+
+Levando em consideração o que foi visto tanto em Xena como em GOT **em termos de temporada os episódios começo/fim tendem a ser mais bem avaliados que os episódios de metade de temporada**.
