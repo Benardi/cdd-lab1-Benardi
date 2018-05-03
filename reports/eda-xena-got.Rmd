@@ -1,11 +1,11 @@
 ---
 title: "EDA Game of Thrones (GOT) and Xena the Warrior Princess"
 output:
-  html_document:
-    df_print: paged
+  html_notebook:
     toc: yes
     toc_float: yes
-  html_notebook:
+  html_document:
+    df_print: paged
     toc: yes
     toc_float: yes
 ---
@@ -46,8 +46,7 @@ episodes %>%
 ```
 
 A série Xena teve em geral centenas de votos para os episódios da série ao longo de suas seis temporadas.  
-
->> E diminuiu das 1as para as últimas...
+A quantidade de votos diminui progressivamente das primeiras temporadas para as últimas
 
 ```{r}
 episodes %>% 
@@ -60,8 +59,7 @@ episodes %>%
 ```
 
 A série GOT teve dezenas de milhares de votos para seus episódios ao longo de suas cinco primeiras temporadas.  
-
->> Além disso, tem alguns poucos episódios com muito mais avaliações do que outros, né? É importante comentar esses pontos.
+Além disso, tem alguns poucos episódios com muito mais avaliações do que outros.
 
 ```{r}
 episodes %>% 
@@ -90,36 +88,20 @@ A série Xena tem entre 20 e 25 episódios por temporada enquanto GOT mantém o 
 ******
 ## Qual das séries é mais bem avaliada no IMDB? 
 
->> a sintaxe do do.call abaixo é meio convoluta e frágil. tenta mudar ela por verbos dplyr. vê meu exemplo no final do chunk, e substitui teu uso de do.call por essa sintaxe no restante do relatório.
-
 ```{r}
-form <- function(x) c(mean = mean(x),
-                      max = max(x),
-                      min = min(x),
-                      q1 = quantile(x, 0.25), 
-                      q2 = quantile(x, 0.50),
-                      q3 = quantile(x, 0.75))
-
-epsd_summr <- 
-    episodes %>% 
-    subset(select=c("user_rating", "series_name")) %>%
-    aggregate(user_rating ~ series_name, ., form) %>%
-    do.call(data.frame, .) %>%
-    setNames(c("series_name","mean","max","min","q1","q2","q3")) 
-
-epsd_summr
-
-sumario_simples <- episodes %>% 
+sumario_simples <- episodes %>%
     select(user_rating, series_name) %>%
-    group_by(series_name) %>% 
+    group_by(series_name) %>%
     summarise(
         mean = mean(user_rating),
         max = max(user_rating),
         min = min(user_rating),
-        q1 = quantile(user_rating, 0.25), 
+        q1 = quantile(user_rating, 0.25),
         q2 = quantile(user_rating, 0.50),
         q3 = quantile(user_rating, 0.75)
-    )
+    ) 
+
+sumario_simples
 
 ```
 
@@ -142,19 +124,20 @@ episodes %>%
 Em termos de quartis e de densidade de frequência **a série _Game of Thrones_ é mais bem avaliada do que a série _Xena a Princesa Guerreira_ no IMBD**.  
 
 ```{r}
-form <- function(x) c(mean = mean(x), sd = sd(x), n =length(x))
-
 episodes %>% 
-    aggregate(user_rating ~ series_name, ., form) %>%
-    do.call(data.frame, .) %>%
-    mutate(se = user_rating.sd/sqrt(user_rating.n)) %>%
-    setNames(c("series_name","mean","sd","n","se")) %>% 
-    ggplot(aes(series_name,mean, fill = series_name)) + 
-    geom_bar(stat='identity') + 
+    group_by(series_name) %>%
+    summarise(
+        mean = mean(user_rating),
+        sd = sd(user_rating),
+        n = n()
+    ) %>%
+    mutate(se = sd/sqrt(n)) %>%
+    ggplot(aes(series_name,mean, fill = series_name)) +
+    geom_bar(stat='identity') +
     geom_errorbar(aes(width= 0.25,
                       ymax = mean + se,
                       ymin = mean - se)) +
-    scale_fill_discrete(name = "Série") + 
+    scale_fill_discrete(name = "Série") +
     scale_y_continuous(limits = c(0,10)) +
     labs(y = "mean user_rating")
 ```
@@ -250,30 +233,22 @@ Avaliando a dispersão e a densidade de frequência das notas de ambas séries p
 Consideraremos os 20% iniciais e os 20% finais como o começo e fim de temporada, e os 60% entre essas duas parcelas como o meio de temporada. O período será considerado melhor avaliado se tiver o episódio de maior pontuação, caso haja empate será o que tiver valores mais altos mais frequentemente.   
 
 ```{r}
-form <- function(x) c(mean = mean(x),
-                      max = max(x),
-                      min = min(x),
-                      n =length(x))
-                
 
-epsd_summr <- 
+sumario_simples <- 
     episodes %>% 
-    subset(select=c("season_ep", "season","series_name")) %>%
-    aggregate(season_ep ~ series_name+season, ., form) %>%
-    do.call(data.frame, .) %>%
-    setNames(c("series_name","season","mean","max","min","n")) %>%
-    rowwise() %>%
-    mutate(p20 = quantile(seq(from=1, to=n, by=1), 0.20)) %>%
-    mutate(p80 = quantile(seq(from=1, to=n, by=1), 0.80))
+    select(season_ep,season,series_name) %>%
+    group_by(series_name,season) %>% 
+    summarise(n = n(),
+               p20 = quantile(seq(from=1, to=n, by=1), 0.20),
+               p80 = quantile(seq(from=1, to=n, by=1), 0.80))
 
-epsd_summr
+sumario_simples
 ```
 
->> para ficar na sintaxe/gramática dplyr, substitui merge por left_join, e rowwise por group_by
-
 ```{r}
-episodes <- merge(episodes, epsd_summr) %>% 
-    rowwise() %>%
+episodes <- left_join(episodes, sumario_simples,
+                      by = c("series_name", "season", "n", "p20", "p80")) %>% 
+    group_by(series_name, season) %>%
     mutate(middle_eps = (season_ep > p20) &
                (season_ep < p80)) 
 episodes
