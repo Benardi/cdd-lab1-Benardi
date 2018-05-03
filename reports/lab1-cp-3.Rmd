@@ -36,12 +36,51 @@ episodes %>%
 ## Data Overview
 
 ```{r}
-episodes %>%
+sumario_n_seasons <-episodes %>%
     mutate(season = as.numeric(season)) %>%
     group_by(series_name) %>%
-    summarise(n_seasons = max(season)) %>%
+    summarise(n_seasons = max(season))
+
+episodes <- left_join(episodes, sumario_n_seasons, by= c("series_name","n_seasons"))
+
+episodes %>%
+    select(series_name, episode, n_seasons) %>%
+    glimpse()
+```
+
+
+```{r}
+episodes %>%
     ggplot(aes(n_seasons)) +
     geom_bar()
 ```
 
+```{r}
+episodes %>%
+    group_by(episode) %>%
+    filter(user_votes != max(user_votes)) %>%
+    ggplot(aes(user_votes)) +
+    geom_density()
+```
 
+```{r}
+episodes %>%
+    select(series_name,episode,season,season_ep,user_votes) %>%
+    filter(user_votes == max(user_votes))
+```
+
+```{r}
+episodes %>%
+    ggplot(aes(n_seasons, 
+               user_rating, 
+               fill=as.factor(n_seasons))) +
+    geom_boxplot()
+```
+
+```{r}
+episodes %>%
+    ggplot(aes(n_seasons, 
+               user_rating, 
+               fill=as.factor(n_seasons))) +
+    geom_boxplot()
+```
