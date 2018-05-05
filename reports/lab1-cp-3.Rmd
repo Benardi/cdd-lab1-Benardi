@@ -1,5 +1,6 @@
 ---
 title: "EDA LAB 1 - Checkpoint 3"
+author: "José Benardi de Souza Nunes"
 output:
   html_notebook:
     toc: yes
@@ -12,14 +13,13 @@ output:
 
 ## Conjunto de dados utilizado
 
-Análise exploratória de dados do [IMDB](https://www.imdb.com/)  sobre seriados de TV e Streaming. Os dados originais e as variáveis vem [dneste repositorio](https://github.com/nazareno/imdb-series) . Lá tem a explicação de como os dados foram gerados e do significado de cada variável.
+> Análise exploratória de dados do [IMDB](https://www.imdb.com/)  sobre seriados de TV e Streaming. Os dados originais e as variáveis vem [deste repositorio](https://github.com/nazareno/imdb-series) . Lá tem a explicação de como os dados foram gerados e do significado de cada variável.
 
 ```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
 library(tidyverse)
 library(here)
 theme_set(theme_bw())
 ```
-
 
 ```{r}
 episodes <- read_csv(here("data/series_from_imdb.csv"), 
@@ -35,52 +35,196 @@ episodes %>%
 
 ## Data Overview
 
+### Tamanho das temporadas
 ```{r}
-sumario_n_seasons <-episodes %>%
-    mutate(season = as.numeric(season)) %>%
-    group_by(series_name) %>%
-    summarise(n_seasons = max(season))
+sumario_n_seasons <- episodes %>%
+    group_by(series_name, season) %>%
+    summarise(season_size = n()) 
 
-episodes <- left_join(episodes, sumario_n_seasons, by= c("series_name","n_seasons"))
+episodes <- left_join(episodes, sumario_n_seasons, by= c("series_name","season")) 
+```
 
-episodes %>%
-    select(series_name, episode, n_seasons) %>%
-    glimpse()
+```{r}
+episodes %>% 
+    select(series_name, season, season_size) %>% 
+    unique()
 ```
 
 
 ```{r}
 episodes %>%
-    ggplot(aes(n_seasons)) +
-    geom_bar()
+    select(series_name, season, season_size) %>% 
+    unique() %>%
+    ggplot(aes(season_size)) + 
+    geom_histogram(binwidth = 1)
 ```
+
+```{r}
+episodes %>%
+    select(series_name,
+           season,
+           season_size) %>% 
+    unique() %>%
+    ggplot(aes(season_size)) + 
+    geom_density(aes(y= 2.5 * ..count..),
+                 color="lightblue") +
+    geom_vline(xintercept = mean(episodes$season_size), 
+               color = "darkred",
+               size=1) + 
+    geom_vline(xintercept = median(episodes$season_size), 
+               color = "darkgreen",
+               size=1) +
+    scale_x_continuous(breaks=seq(0,120,5))
+
+```
+
+```{r}
+episodes %>%
+    select(series_name,
+           season,
+           season_size) %>% 
+    unique() %>% 
+    top_n(10, season_size) %>% 
+    arrange(desc(season_size))
+```
+
+A série *Yu Yu Hakusho* que possui 4 temporadas está tendos todos seus episódios erroneamente marcados como da primeira temporada. Por esse motivo não incluiremos a série *Yu Yu Hakusho* na análise referente a tamanho das temporadas.
+
+```{r}
+episodes %>% 
+    filter(series_name != "Yu Yu Hakusho") %>%
+    ggplot(aes(sample=season_size)) +
+    stat_qq() 
+```
+
+
+### Número de votos de um dado episódio
 
 ```{r}
 episodes %>%
     group_by(episode) %>%
     filter(user_votes != max(user_votes)) %>%
     ggplot(aes(user_votes)) +
-    geom_density()
+    geom_histogram(binwidth = 50) 
 ```
 
 ```{r}
 episodes %>%
     select(series_name,episode,season,season_ep,user_votes) %>%
-    filter(user_votes == max(user_votes))
+    top_n(10, user_votes) %>% 
+    arrange(desc(user_votes))
+```
+
+```{r}
+episodes %>% 
+    group_by(episode) %>%
+    ggplot(aes(sample=user_votes)) + 
+        stat_qq() 
+```
+
+### Avaliação dos usuários
+
+```{r}
+episodes %>% 
+    group_by(episode) %>%
+    ggplot(aes(user_rating)) +
+    geom_histogram(binwidth = 0.1)
+
+```
+
+```{r}
+episodes %>% 
+    group_by(episode) %>%
+    ggplot(aes(sample=user_rating)) + 
+        stat_qq() 
+```
+
+
+## Temporadas mais curtas são mais bem avaliadas?
+
+
+```{r}
+episodes %>%
+    filter(series_name != "Yu Yu Hakusho") %>%
+    ggplot(aes(season_size, 
+               user_rating, 
+               color=season_size)) +
+    geom_point(position = position_jitterdodge())
 ```
 
 ```{r}
 episodes %>%
-    ggplot(aes(n_seasons, 
+    filter(series_name != "Yu Yu Hakusho") %>%
+    ggplot(aes(season_size, 
                user_rating, 
-               fill=as.factor(n_seasons))) +
-    geom_boxplot()
+               group=season_size)) +
+    geom_boxplot(outlier.shape = NA,
+                 coef = 0,
+                 position = "dodge") 
+```
+
+
+```{r}
+
+spline_int <- as.data.frame(spline(episodes$season_size, episodes$user_rating))
+
+summary <-  episodes %>%
+    filter(series_name != "Yu Yu Hakusho") %>%
+    group_by(season_size) %>%
+    summarise(mean_usr_rating = mean(user_rating))
+
+summary %>%
+    ggplot(aes(season_size, 
+       mean_usr_rating,color=season_size)) + 
+    geom_point() +
+    geom_line()
 ```
 
 ```{r}
+temp <- 
 episodes %>%
-    ggplot(aes(n_seasons, 
-               user_rating, 
-               fill=as.factor(n_seasons))) +
-    geom_boxplot()
+filter(series_name != "Yu Yu Hakusho")
+
+qplot(x= temp$season_size,
+      y = temp$user_rating,
+      geom="smooth")
 ```
+
+## Os episódios que recebem mais votação são episódios mais bem avaliados?
+
+```{r}
+episodes %>% 
+    group_by(episode) %>%
+    ggplot(aes(user_votes,user_rating)) +
+    geom_jitter(width = 0.8)
+```
+
+```{r}
+episodes %>% 
+    group_by(episode) %>%
+    ggplot(aes(user_rating)) +
+        geom_density(aes(y= 0.1 * ..count..),
+                 color="darkblue") +
+    geom_vline(xintercept = mean(episodes$user_rating), color = "darkred") + 
+    geom_vline(xintercept = median(episodes$user_rating), color = "darkgreen") +
+    scale_x_continuous(breaks=seq(0,10,0.5))
+```
+
+```{r}
+episodes <- 
+    episodes %>% 
+    mutate(bem_avaliado = user_rating >= 8)
+
+episodes %>% 
+    select(episode,user_rating,bem_avaliado)
+```
+
+```{r}
+episodes %>% 
+    ggplot(aes(user_votes,bem_avaliado,
+               size = user_votes,
+               color = bem_avaliado)) +
+    geom_point(alpha = .5) +
+    scale_x_continuous(breaks=seq(0,1000000,15000))
+```
+
