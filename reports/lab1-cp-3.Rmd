@@ -56,17 +56,14 @@ episodes %>%
            season,
            season_size) %>% 
     unique() %>%
-    ggplot(aes(season_size)) + 
-    geom_density(aes(y= 2.5 * ..count..),
-                 color="lightblue") +
-    geom_histogram(binwidth = 1) +
-    # geom_vline(xintercept = mean(episodes$season_size), 
-    #            color = "darkred",
-    #            size=1) + 
-    # geom_vline(xintercept = median(episodes$season_size), 
-    #            color = "darkgreen",
-    #            size=1) +
-    scale_x_continuous(breaks=seq(0,120,5))
+    ggplot(aes(season_size,..density..)) + 
+    geom_density(aes(y= 2.5 *..density..),
+             color="lightpink") +
+    geom_histogram(binwidth = 1, 
+                   fill="grey",
+                   color="black") +
+    scale_x_continuous(breaks=seq(0,120,5)) +
+    labs(y = "Densidade de frequência", x = "Tamanho da temporada")
 
 ```
 
@@ -96,8 +93,12 @@ episodes %>%
 episodes %>%
     group_by(episode) %>%
     filter(user_votes != max(user_votes)) %>%
-    ggplot(aes(user_votes)) +
-    geom_histogram(binwidth = 50) 
+    ggplot(aes(user_votes,y=..density..)) +
+    geom_histogram(binwidth = 50,
+                   fill="grey",
+                   color="black") +
+    labs(x = "Votos dos usuários",
+         y = "Densidade de frequência")
 ```
 
 ```{r}
@@ -119,8 +120,12 @@ episodes %>%
 ```{r}
 episodes %>% 
     group_by(episode) %>%
-    ggplot(aes(user_rating)) +
-    geom_histogram(binwidth = 0.1)
+    ggplot(aes(user_rating, ..density..)) +
+    geom_histogram(binwidth = 0.1,
+                   fill="grey",
+                   color="black") +
+    labs(x = "Nota do episódio",
+         y = "Densidade de frequência")
 
 ```
 
@@ -165,11 +170,16 @@ episodes %>%
     filter(series_name != "Yu Yu Hakusho") %>%
     select(series_name, median_season_size) %>% 
     unique() %>%
-    ggplot(aes(median_season_size)) +
-    geom_density(aes(y= 3 * ..count..),
-                 color="lightblue") +
-    geom_histogram(binwidth = 1) +
-    scale_x_continuous(breaks=seq(0,120,5))
+    ggplot(aes(median_season_size,..density..)) +
+    geom_density(aes(y= 2.5 *..density..),
+                 color="red") +
+    geom_histogram(binwidth = 1,
+                   fill="grey",
+                   color="black") +
+    scale_x_continuous(breaks=seq(0,120,5)) +
+        labs(x = "Tamanho mediano de temporada",
+         y = "Densidade de frequência")
+
 ```
 
 ### Consenso em relação à nota de um episódio
@@ -188,9 +198,13 @@ episodes %>%
 episodes %>%
     select(series_name, consensus) %>% 
     unique() %>%
-    ggplot(aes(consensus)) +
-    geom_histogram(binwidth = 0.01) +
-        scale_x_continuous(breaks=seq(0,1,0.125))
+    ggplot(aes(consensus,..density..)) +
+    geom_histogram(binwidth = 0.01,
+                   fill="grey",
+                   color="black") +
+    scale_x_continuous(breaks=seq(0,1,0.125)) +
+    labs(x = "Grau de consenso",
+         y = "Densidade de frequência")
 
 ```
 
@@ -212,7 +226,9 @@ episodes %>%
                season_size)) +
     geom_point(alpha=0.08,
                color="#ff6666") +
-        scale_x_continuous(breaks=seq(0,10,1))
+        scale_x_continuous(breaks=seq(0,10,1)) +
+          labs(x = "Nota dada pelo usuário",
+         y = "Tamanho da temporada")
 ```
 
 ```{r}
@@ -222,15 +238,17 @@ episodes %>%
                user_rating, 
                group=season_size)) +
     geom_boxplot(position = "dodge",
-                 fill="#ff6666") +
-        scale_x_continuous(breaks=seq(0,90,5))
+                 outlier.shape = NA,
+                 coef = 0,
+                 color="#ff6666") +
+    scale_x_continuous(breaks=seq(0,90,5)) +
+    labs(y = "Nota dada pelo usuário",
+         x = "Tamanho da temporada")
+    
 ```
 
 
 ```{r}
-
-spline_int <- as.data.frame(spline(episodes$season_size, episodes$user_rating))
-
 summary <-  episodes %>%
     filter(series_name != "Yu Yu Hakusho") %>%
     group_by(season_size) %>%
@@ -240,8 +258,9 @@ summary %>%
     ggplot(aes(season_size, 
        mean_usr_rating,color=season_size)) + 
     geom_point() +
-    geom_line() +
-    scale_x_continuous(breaks=seq(0,90,5))
+    scale_x_continuous(breaks=seq(0,90,5)) +
+        labs(y = "Nota Mediana",
+             x = "Tamanho da temporada")
 ```
 
 ### Séries cujas temporadas são mais curtas são mais bem avaliadas?
@@ -253,7 +272,9 @@ episodes %>%
     unique() %>%
     ggplot(aes(user_rating,
                median_season_size)) +
-    geom_point(alpha = 0.1, color="#A58AFF") 
+    geom_point(alpha = 0.1, color="#A58AFF") +
+        labs(x = "Nota dada pelo usuário",
+         y = "Tamanho mediano da temporada")
 
 ```
 
@@ -263,13 +284,17 @@ episodes %>%
     group_by(series_name) %>%
     unique() %>%
     ggplot(aes(median_season_size,
-           user_rating, 
+           user_rating,
            group=median_season_size)) +
-    geom_boxplot(fill="#A58AFF") +
-    scale_x_continuous(breaks=seq(0,90,5))
+    geom_boxplot(position = "dodge",
+                 outlier.shape = NA,
+                 coef = 0,
+                 fill="#A58AFF",
+                 width=0.5) +
+    scale_x_continuous(breaks=seq(0,90,5)) +
+        labs(y = "Nota dada pelo usuário",
+         x = "Tamanho mediano da temporada")
 ```
-
-
 
 ### O tamanho da temporada afeta o consenso?
 
@@ -277,8 +302,10 @@ episodes %>%
 episodes %>%
     filter(series_name != "Yu Yu Hakusho") %>%
     ggplot(aes(season_size,consensus)) +
-    geom_point(alpha=0.08,
-               color="#A58AFF") 
+    geom_point(alpha=0.3) +
+    labs(y = "Grau de consenso",
+         x = "Tamanho da temporada")
+    
 ```
 
 
@@ -289,10 +316,11 @@ episodes %>%
     ggplot(aes(user_votes,user_rating,
                size = user_votes)) +
     geom_point(alpha=.3,
-               color="#ff6666",
                position = position_jitterdodge()) +
     scale_y_continuous(breaks=seq(0,10,1)) +
-    scale_x_continuous(breaks=seq(0,1000000,15000))
+    scale_x_continuous(breaks=seq(0,1000000,15000)) +
+    labs(y = "Nota dada pelo usuário",
+         x = "Número de votos")
 
 ```
 
@@ -300,11 +328,13 @@ episodes %>%
 episodes %>% 
     group_by(episode) %>%
     ggplot(aes(user_rating)) +
-        geom_density(aes(y= 0.1 * ..count..),
+        geom_density(aes(y= 0.1 * ..density..),
                  color="darkblue") +
     geom_vline(xintercept = mean(episodes$user_rating), color = "darkred") + 
     geom_vline(xintercept = median(episodes$user_rating), color = "darkgreen") +
-    scale_x_continuous(breaks=seq(0,10,0.5))
+    scale_x_continuous(breaks=seq(0,10,0.5)) +
+    labs(y = "Densidade de frequência",
+         x = "Nota dada pelo usuário")
 ```
 
 ```{r}
@@ -319,11 +349,10 @@ episodes %>%
 ```{r}
 episodes %>% 
     ggplot(aes(user_votes,bem_avaliado,
-               size = user_votes,
                color = bem_avaliado)) +
-    geom_point(alpha = .5,
-               position = position_jitterdodge()) +
-    scale_x_continuous(breaks=seq(0,1000000,15000))
+    geom_jitter(alpha = .8, width = 0.6) +
+    scale_x_continuous(breaks=seq(0,1000000,15000)) +
+            labs(x = "Número de votos")
 ```
 
 ### Os episódios mais bem avaliados geram mais consenso?
@@ -332,5 +361,7 @@ episodes %>%
 episodes %>% 
     ggplot(aes(consensus,bem_avaliado,
                color = bem_avaliado)) +
-    geom_jitter(alpha=0.06)
+    geom_jitter(alpha=0.08) +
+    labs(x = "Grau de consenso")
+
 ```
