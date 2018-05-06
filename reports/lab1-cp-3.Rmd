@@ -15,7 +15,7 @@ output:
 
 ### Conjunto de dados utilizado
 
-> Análise exploratória de dados do [IMDB](https://www.imdb.com/)  sobre seriados de TV e Streaming. Os dados originais e as variáveis vem [deste repositorio](https://github.com/nazareno/imdb-series) . Lá tem a explicação de como os dados foram gerados e do significado de cada variável.
+> Análise exploratória de dados do [IMDB](https://www.imdb.com/)  sobre seriados de TV e Streaming. Os dados originais e as variáveis vêm [deste repositorio](https://github.com/nazareno/imdb-series) . Lá consta a explicação de como os dados foram gerados e do significado de cada variável.
 
 ```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
 library(tidyverse)
@@ -36,6 +36,8 @@ episodes %>%
 ```
 
 ### Pequena explicação sobre estimadores empregados
+
+<br></br>
 
 ```
 - Média: é a soma dos valores dos elementos de um conjunto dividido pelo número de elementos nesse conjunto.
@@ -399,6 +401,8 @@ episodes %>%
 
 ```
 
+Existe um vísivel acréscimo no numero de votos quando passamos de notas em torno de 7. **Na faixa de notas entre 8 e 10 é perceptível um grande aumento no número de votos**.  
+
 ```{r}
 episodes %>% 
     group_by(episode) %>%
@@ -412,13 +416,18 @@ episodes %>%
          x = "Nota dada pelo usuário")
 ```
 
+Como já foi dito anteriormente a nota 8 é um ponto de particular interesse (moda) para a distribuição das notas. A média (linha vermelha) e a mediana (linha verde) também convergem para essa nota. Por ese motivo **iremos comparar o consenso entre os episódios cujas notas estão abaixo de 8 (não bem_avaliado) com os que cujas notas estão acima de 8 (bem_avaliado)**.  
+
 ```{r}
 episodes <- 
     episodes %>% 
     mutate(bem_avaliado = user_rating >= 8)
 
 episodes %>% 
-    select(episode,user_rating,bem_avaliado)
+    select(episode,
+           user_rating,
+           bem_avaliado) %>%
+    sample_n(10)
 ```
 
 ```{r}
@@ -430,6 +439,8 @@ episodes %>%
             labs(x = "Número de votos")
 ```
 
+Resultados semelhantes à dispersão sem distinção dos bem avaliados. É ainda mais nítida a ligação entre notas mais altas e maior número de votos. 
+
 ### Os episódios mais bem avaliados geram mais consenso?
 
 ```{r}
@@ -437,6 +448,18 @@ episodes %>%
     ggplot(aes(consensus,bem_avaliado,
                color = bem_avaliado)) +
     geom_jitter(alpha=0.08) +
+    scale_x_continuous(breaks=seq(0,1,0.1)) +
     labs(x = "Grau de consenso")
 
 ```
+
+Curiosamente a massa de maior densidade de ocorrências (parte mais escura) dos dois grupos é relativamente próxima uma da outra, ainda assim é possível perceber que a massa das ocorrências dos bem avaliados está mais à direita (maior grau de consenso).       
+
+**Os episódios bem avalidos geram mais consenso**, ocorrências acima dos 0.5/50% são mais frequentes nos bem avaliados e em geral a massa das ocorrências dos bem avaliados está mais à direita (maior grau de consenso) do que os não bem avaliados. 
+
+<br></br>
+
+### Conclusão
+
+* Existe um vísivel acréscimo no número de votos quando passamos para notas mais altas (especialmente acima de 8).
+* Os episódios bem avalidos geram mais consenso.
