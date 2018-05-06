@@ -39,6 +39,7 @@ episodes %>%
 
 ```
 - Média: é a soma dos valores dos elementos de um conjunto dividido pelo número de elementos nesse conjunto.
+- Moda: é o valor mais frequente dentro de um conjunto de valores.
 - Mediana: é o valor que dentro de um conjunto de valores ordenados numericamente os divide em 50% maiores e 50% menores.
 - IQR: em um conjunto de valores ordenados numericamente contém os 50% centrais dos valores, e.g. se tivessemos uma sequência de 1 até 100 o IQR iria de 25 até 75 (os 50 valores do meio).
 
@@ -50,26 +51,25 @@ qqnorm(x, pch = 1, frame = FALSE);
 qqline(x, col = "red", lwd = 2);
 ```
 
-O gráfico Q-Q Plot será usado pra descrever dados que serão usados na análise. O Q-Q Plot de uma distribuição bem comportada (normal, simétrica..) é bem alinhado como no gráfico exemplo.
-
+O gráfico Q-Q Plot (gráfico de quantis) será usado pra descrever dados que serão usados na análise. O Q-Q Plot de uma distribuição bem comportada (normal, simétrica..) é bem alinhado como no gráfico exemplo.
 
 ***
 
 ## Data Overview
 
 ### Tamanho das temporadas
+
 ```{r}
 sumario_n_seasons <- episodes %>%
     group_by(series_name, season) %>%
     summarise(season_size = n()) 
 
 episodes <- left_join(episodes, sumario_n_seasons, by= c("series_name","season")) 
-```
 
-```{r}
 episodes %>% 
     select(series_name, season, season_size) %>% 
-    unique()
+    unique() %>%
+    sample_n(10)
 ```
 
 ```{r}
@@ -89,6 +89,8 @@ episodes %>%
 
 ```
 
+O tamanho de temporada mais frequente é em torno de 10 e em torno de 20 episódios (Duas modas ou bimodal). Algumas poucas temporadas são curiosamente longas, não existem valores que fujam ao domínio da grandeza (e.g. valores negativos) e que por isso invalidem nossa análise.    
+
 ```{r}
 episodes %>%
     select(series_name,
@@ -99,6 +101,8 @@ episodes %>%
     arrange(desc(season_size))
 ```
 
+Observermos as temporadas que chamaram nossa atenção por serem demasiadamente longas.
+
 A série *Yu Yu Hakusho* que possui 4 temporadas está tendos todos seus episódios erroneamente marcados como da primeira temporada. Por esse motivo não incluiremos a série *Yu Yu Hakusho* na análise referente a tamanho das temporadas.
 
 ```{r}
@@ -108,6 +112,7 @@ episodes %>%
     stat_qq() 
 ```
 
+No Q-Q plot além disso existe uma quebra (descontinuidade) nele. Isso casa com o histograma, pois temos duas modas (valores mais frequentes).  
 
 ### Número de votos de um dado episódio
 
@@ -119,9 +124,13 @@ episodes %>%
     geom_histogram(binwidth = 50,
                    fill="grey",
                    color="black") +
+    scale_x_continuous(breaks=seq(0,9750,250)) +
     labs(x = "Votos dos usuários",
-         y = "Densidade de frequência")
+         y = "Densidade de frequência") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
+
+Nitidamente temos uma moda entre 0 e 250 votos, os maiores valores são muito distantes do valor mais frequente, sendo assim a mediana e a média serão maiores que o valor mais frequente. Não existem valores que fujam ao domínio da grandeza (e.g. valores negativos) e que por isso invalidem nossa análise.    
 
 ```{r}
 episodes %>%
@@ -130,12 +139,16 @@ episodes %>%
     arrange(desc(user_votes))
 ```
 
+Demos uma olhada nos 10 episódios mais votados entre todos.
+
 ```{r}
 episodes %>% 
     group_by(episode) %>%
     ggplot(aes(sample=user_votes)) + 
         stat_qq()
 ```
+
+O gráfico de quantis representa claramente o salto nos valores máximos, os quais estão bem distantes do resto da distribuição de valores.
 
 ### Avaliação dos usuários
 
@@ -147,8 +160,11 @@ episodes %>%
                    fill="grey",
                    color="black") +
     labs(x = "Nota do episódio",
-         y = "Densidade de frequência")
+         y = "Densidade de frequência") +
+        scale_x_continuous(breaks=seq(0,10,1)) 
 ```
+
+A nota mais frequente é nitidamente em torno de 8. A distribuição é *relativamente* bem comportada (simétrica) porém existe a ocorrência de notas mais baixas (entre 3 e 6). Não existem valores que fujam ao domínio da grandeza (e.g. valores negativos) e que por isso invalidem nossa análise.     
 
 ```{r}
 episodes %>% 
@@ -157,8 +173,14 @@ episodes %>%
         stat_qq() 
 ```
 
+As notas baixas discutidas anteriormente afetam a curvatura da curva e atestam que as notas do episódio não formam de fato uma distribuição simétrica (bem comportada).
 
 ### Tamanho mediano da temporada de uma série
+
+Para representar o tamanho geral da temporada de uma série, faremos uso da mediana. Entre os argumentos para obtar pela mediana ao invés de outras medidas como uma média ou média aparada listamos:
+
+* A mediana torna menos recorrente o aparecimento de valores não inteiros (e.g. 4,6) que não fariam sentido para algo como o tamanho de uma série.
+* A mediana é uma medida robusta, ou seja ela é menos facilmente afetada por valores extremos.
 
 ```{r}
 summary_season_size <- episodes %>%
@@ -182,15 +204,6 @@ episodes %>%
     filter(series_name != "Yu Yu Hakusho") %>%
     select(series_name, median_season_size) %>% 
     unique() %>%
-    ggplot(aes(sample=median_season_size)) + 
-        stat_qq() 
-```
-
-```{r}
-episodes %>%
-    filter(series_name != "Yu Yu Hakusho") %>%
-    select(series_name, median_season_size) %>% 
-    unique() %>%
     ggplot(aes(median_season_size,..density..)) +
     geom_density(aes(y= 2.5 *..density..),
                  color="red") +
@@ -203,7 +216,22 @@ episodes %>%
 
 ```
 
+O tamanho mediano da temporada se comporta semelhantemente ao tamanho de uma temporada.
+
+```{r}
+episodes %>%
+    filter(series_name != "Yu Yu Hakusho") %>%
+    select(series_name, median_season_size) %>% 
+    unique() %>%
+    ggplot(aes(sample=median_season_size)) + 
+        stat_qq() 
+```
+
+O tamanho mediano da temporada mais uma vez se comporta semelhantemente ao tamanho de uma temporada, com o detalhe que valores extremos são menos expressivos.
+
 ### Consenso em relação à nota de um episódio
+
+Geramos a informação de consenso como o máximo entre as frequências relativas das possíveis notas  de 1 até 10 (r1 até r10), quanto maior este máximo maior a proporção de pessoas cujas notas coincidiram. 
 
 ```{r}
 episodes <- episodes %>%
@@ -212,7 +240,8 @@ episodes <- episodes %>%
     ungroup()
 
 episodes %>% 
-    select(episode,consensus)  
+    select(episode,consensus) %>%
+    sample_n(10)
 ```
 
 ```{r}
@@ -229,6 +258,8 @@ episodes %>%
 
 ```
 
+A moda do grau de consenso está em torno de 0.3125, ou seja 31,25% das pessoas deram a mesma nota ao episódio. Além disso, valores mais altos indo até em torno de 87,50% de consenso ocorrem. Não existem valores que fujam ao domínio da grandeza (e.g. valores negativos) e que por isso invalidem nossa análise.     
+
 ```{r}
 episodes %>%
     select(series_name, consensus) %>% 
@@ -236,6 +267,8 @@ episodes %>%
     ggplot(aes(sample=consensus)) + 
         stat_qq() 
 ```
+
+Os valores altos e distantes da moda afetam a curvatura do gráfico de quantis, o qual atesta que a distribuição do grau de consenso não é bem comportada (simétrica).
 
 ***
 
@@ -266,9 +299,7 @@ episodes %>%
     scale_x_continuous(breaks=seq(0,90,5)) +
     labs(y = "Nota dada pelo usuário",
          x = "Tamanho da temporada")
-    
 ```
-
 
 ```{r}
 summary <-  episodes %>%
