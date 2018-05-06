@@ -1,15 +1,18 @@
 ---
-title: "EDA LAB 1 - Checkpoint 3"
+title: "EDA sobre séries no IMDB"
+subtitle: 'Existe relação entre tamanho da temporada, número de votos, notas e consenso?'
 author: "José Benardi de Souza Nunes"
 output:
-  html_notebook:
-    toc: yes
-    toc_float: yes
   html_document:
     df_print: paged
     toc: yes
     toc_float: yes
+  html_notebook:
+    toc: yes
+    toc_float: yes
 ---
+
+<br></br>
 
 ## Introdução
 
@@ -38,7 +41,7 @@ episodes %>%
 ### Pequena explicação sobre estimadores empregados
 
 <br></br>
-
+    
 ```
 - Média: é a soma dos valores dos elementos de um conjunto dividido pelo número de elementos nesse conjunto.
 - Moda: é o valor mais frequente dentro de um conjunto de valores.
@@ -53,11 +56,81 @@ qqnorm(x, pch = 1, frame = FALSE);
 qqline(x, col = "red", lwd = 2);
 ```
 
-O gráfico Q-Q Plot (gráfico de quantis) será usado pra descrever dados que serão usados na análise. O Q-Q Plot de uma distribuição bem comportada (normal, simétrica..) é bem alinhado como no gráfico exemplo.
+O gráfico Q-Q Plot (gráfico de quantis) será usado pra descrever dados que serão usados na análise. O Q-Q Plot de uma distribuição bem comportada (normal, simétrica..) é bem alinhado como no gráfico exemplo.  
 
 ***
 
 ## Data Overview
+
+### Número de votos de um dado episódio
+
+```{r}
+episodes %>%
+    group_by(episode) %>%
+    filter(user_votes != max(user_votes)) %>%
+    ggplot(aes(user_votes,y=..density..)) +
+    geom_histogram(binwidth = 50,
+                   fill="grey",
+                   color="black") +
+    scale_x_continuous(breaks=seq(0,9750,250)) +
+    labs(x = "Votos dos usuários",
+         y = "Densidade de frequência") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+* Nitidamente temos uma moda entre 0 e 250 votos.
+* Os maiores valores são muito distantes do valor mais frequente, isso afeta a mediana e a média as tornando maiores que o valor mais frequente. 
+* Não existem valores que fujam ao domínio da grandeza (e.g. valores negativos) e que por isso invalidem nossa análise. 
+
+<br></br>
+
+Demos uma olhada nos _10 episódios mais votados_ entre todos:
+
+
+```{r}
+episodes %>%
+    select(series_name,episode,user_votes) %>%
+    top_n(10, user_votes) %>% 
+    arrange(desc(user_votes))
+```
+
+Os top 3 episódios com mais votos são sensivelmente maiores do que o resto, em especial o primeiro colocado que está mais de 40.000 votos acima dos segundo colocado.
+
+```{r}
+episodes %>% 
+    group_by(episode) %>%
+    ggplot(aes(sample=user_votes)) + 
+        stat_qq()
+```
+
+* O gráfico de quantis representa claramente o salto nos valores máximos, os quais estão bem distantes do resto da distribuição de valores.
+
+### Avaliação dos usuários
+
+```{r}
+episodes %>% 
+    group_by(episode) %>%
+    ggplot(aes(user_rating, ..density..)) +
+    geom_histogram(binwidth = 0.1,
+                   fill="grey",
+                   color="black") +
+    labs(x = "Nota do episódio",
+         y = "Densidade de frequência") +
+        scale_x_continuous(breaks=seq(0,10,1)) 
+```
+
+* A nota mais frequente é nitidamente em torno de 8.
+* A distribuição é *relativamente* bem comportada (simétrica), porém existe a ocorrência de notas mais baixas (entre 3 e 6). 
+* Não existem valores que fujam ao domínio da grandeza (e.g. valores negativos) e que por isso invalidem nossa análise.     
+
+```{r}
+episodes %>% 
+    group_by(episode) %>%
+    ggplot(aes(sample=user_rating)) + 
+        stat_qq() 
+```
+
+* As notas baixas discutidas anteriormente afetam a curvatura da curva e atestam que as notas do episódio não formam de fato uma distribuição simétrica (bem comportada).
 
 ### Tamanho das temporadas
 
@@ -91,7 +164,14 @@ episodes %>%
 
 ```
 
-O tamanho de temporada mais frequente é em torno de 10 e em torno de 20 episódios (Duas modas ou bimodal). Algumas poucas temporadas são curiosamente longas, não existem valores que fujam ao domínio da grandeza (e.g. valores negativos) e que por isso invalidem nossa análise.    
+* O tamanho de temporada mais frequente é em torno de 10 e em torno de 20 episódios (Duas modas ou bimodal).
+* Algumas poucas temporadas são curiosamente longas. 
+* Não existem valores que fujam ao domínio da grandeza (e.g. valores negativos) e que por isso invalidem nossa análise.  
+
+<br></br>
+
+Observermos as temporadas que **chamaram nossa atenção** por serem demasiadamente longas:
+
 
 ```{r}
 episodes %>%
@@ -103,8 +183,6 @@ episodes %>%
     arrange(desc(season_size))
 ```
 
-Observermos as temporadas que chamaram nossa atenção por serem demasiadamente longas.
-
 A série *Yu Yu Hakusho* que possui 4 temporadas está tendos todos seus episódios erroneamente marcados como da primeira temporada. Por esse motivo não incluiremos a série *Yu Yu Hakusho* na análise referente a tamanho das temporadas.
 
 ```{r}
@@ -114,68 +192,9 @@ episodes %>%
     stat_qq() 
 ```
 
-No Q-Q plot além disso existe uma quebra (descontinuidade) nele. Isso casa com o histograma, pois temos duas modas (valores mais frequentes).  
+* No Q-Q plot  existe uma quebra (descontinuidade), isso casa com o histograma pois temos duas modas (valores mais frequentes).  
 
-### Número de votos de um dado episódio
 
-```{r}
-episodes %>%
-    group_by(episode) %>%
-    filter(user_votes != max(user_votes)) %>%
-    ggplot(aes(user_votes,y=..density..)) +
-    geom_histogram(binwidth = 50,
-                   fill="grey",
-                   color="black") +
-    scale_x_continuous(breaks=seq(0,9750,250)) +
-    labs(x = "Votos dos usuários",
-         y = "Densidade de frequência") +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
-```
-
-Nitidamente temos uma moda entre 0 e 250 votos, os maiores valores são muito distantes do valor mais frequente, sendo assim a mediana e a média serão maiores que o valor mais frequente. Não existem valores que fujam ao domínio da grandeza (e.g. valores negativos) e que por isso invalidem nossa análise.    
-
-```{r}
-episodes %>%
-    select(series_name,episode,season,season_ep,user_votes) %>%
-    top_n(10, user_votes) %>% 
-    arrange(desc(user_votes))
-```
-
-Demos uma olhada nos 10 episódios mais votados entre todos.
-
-```{r}
-episodes %>% 
-    group_by(episode) %>%
-    ggplot(aes(sample=user_votes)) + 
-        stat_qq()
-```
-
-O gráfico de quantis representa claramente o salto nos valores máximos, os quais estão bem distantes do resto da distribuição de valores.
-
-### Avaliação dos usuários
-
-```{r}
-episodes %>% 
-    group_by(episode) %>%
-    ggplot(aes(user_rating, ..density..)) +
-    geom_histogram(binwidth = 0.1,
-                   fill="grey",
-                   color="black") +
-    labs(x = "Nota do episódio",
-         y = "Densidade de frequência") +
-        scale_x_continuous(breaks=seq(0,10,1)) 
-```
-
-A nota mais frequente é nitidamente em torno de 8. A distribuição é *relativamente* bem comportada (simétrica) porém existe a ocorrência de notas mais baixas (entre 3 e 6). Não existem valores que fujam ao domínio da grandeza (e.g. valores negativos) e que por isso invalidem nossa análise.     
-
-```{r}
-episodes %>% 
-    group_by(episode) %>%
-    ggplot(aes(sample=user_rating)) + 
-        stat_qq() 
-```
-
-As notas baixas discutidas anteriormente afetam a curvatura da curva e atestam que as notas do episódio não formam de fato uma distribuição simétrica (bem comportada).
 
 ### Tamanho mediano da temporada de uma série
 
@@ -218,7 +237,7 @@ episodes %>%
 
 ```
 
-O tamanho mediano da temporada se comporta semelhantemente ao tamanho de uma temporada.
+* O tamanho mediano da temporada se comporta semelhantemente ao tamanho de uma temporada.
 
 ```{r}
 episodes %>%
@@ -229,11 +248,11 @@ episodes %>%
         stat_qq() 
 ```
 
-O tamanho mediano da temporada mais uma vez se comporta semelhantemente ao tamanho de uma temporada, com o detalhe que valores extremos são menos expressivos.
+* O tamanho mediano da temporada mais uma vez se comporta semelhantemente ao tamanho de uma temporada.
 
 ### Consenso em relação à nota de um episódio
 
-Geramos a informação de consenso como o máximo entre as frequências relativas das possíveis notas  de 1 até 10 (r1 até r10), quanto maior este máximo maior a proporção de pessoas cujas notas coincidiram. 
+Geramos a informação de consenso como o máximo entre as frequências relativas das possíveis notas  de 1 até 10 (r1 até r10), pois quanto mais elevado esse máximo maior a proporção de pessoas cujas notas coincidiram. 
 
 ```{r}
 episodes <- episodes %>%
@@ -260,7 +279,9 @@ episodes %>%
 
 ```
 
-A moda do grau de consenso está em torno de 0.3125, ou seja 31,25% das pessoas deram a mesma nota ao episódio. Além disso, valores mais altos indo até em torno de 87,50% de consenso ocorrem. Não existem valores que fujam ao domínio da grandeza (e.g. valores negativos) e que por isso invalidem nossa análise.     
+* A moda do grau de consenso está em torno de 0.3125, ou seja o mais frequente foi 31,25% das pessoas darem a mesma nota ao episódio.   
+* Valores mais altos indo até em torno de 87,50% de consenso ocorrem.  
+* Não existem valores que fujam ao domínio da grandeza (e.g. valores negativos) e que por isso invalidem nossa análise.         
 
 ```{r}
 episodes %>%
@@ -270,7 +291,7 @@ episodes %>%
         stat_qq() 
 ```
 
-Os valores altos e distantes da moda afetam a curvatura do gráfico de quantis, o qual atesta que a distribuição do grau de consenso não é bem comportada (simétrica).
+* Os valores altos e distantes da moda afetam a curvatura do gráfico de quantis, o qual atesta que a distribuição do grau de consenso não é bem comportada (simétrica).
 
 ***
 
@@ -289,7 +310,7 @@ episodes %>%
          y = "Tamanho da temporada")
 ```
 
-Temporadas entre 1 e 25 episódios são visivelmente dispersas, com valores indo de 3 até 10,  já que a maior parte das ocorrências está nessa faixa. Apesar disto também **é visível que a maior parcela das ocorrência gira em torno da nota 8 (mais ou menos entre 7 e 9)**. Esse padrão em geral se mantém a despeito do tamanho da temporada e *está em acordo com a moda da distribuição das notas que é 8*. 
+Temporadas entre 1 e 25 episódios são visivelmente dispersas, com valores indo de 3 até 10,  já que a maior parte das ocorrências está nessa faixa. Apesar disso também **é visível que a maior parcela das ocorrência gira em torno da nota 8 (mais ou menos entre 7 e 9)**. Esse padrão em geral se mantém a despeito do tamanho da temporada e *está em acordo com a moda da distribuição das notas que é 8*. 
 
 Existe porém duas exceções:
 
@@ -312,9 +333,10 @@ episodes %>%
          x = "Tamanho da temporada")
 ```
 
-Falemos agora dos boxplots focando em termos de mediana, por isso desconsideraremos os pontos externos  para ter uma visão mais limpa no gráfico. Em termos de mediana  **o que foi visto no gráfico se repete com a queda nas temporadas em torno de 40 episódios**. 
+Falemos agora dos boxplots focando em termos de mediana, por isso desconsideraremos os pontos externos  para ter uma visão mais limpa no gráfico. Em termos de mediana  **o que foi visto no gráfico de dispersão se repete com a queda nas notas das temporadas em torno de 40 episódios**. 
 
-* Os limites inferiores e superiores dos boxplots **(bigodes dos boxplots) mostram o aumento acima do ponto dos 40 episódios como não tão relevantes**, pois os boxplots mais acima (os acima de 40 episódios) estão contidos na faixa compreendida pelos limites pelos boxplots 'aparentemente' abaixo.
+* Os limites inferiores e superiores dos boxplots **(bigodes dos boxplots) mostram o aumento das nota das temporadas com mais de 40 episódios como não tão relevantes**.
+    + Os boxplots destas temporadas ficam entre os limites dos boxplots das temporadas menores (Existe forte intersecção de valores).
 
 ### Séries cujas temporadas são mais curtas são mais bem avaliadas?
 
@@ -333,7 +355,8 @@ episodes %>%
 
 ```
 
-Observando a nota por tamanho mediano da temporada  vemos que a distribuição das notas se comporta semelhantemente a quando a observamos do ponto de vista da temporada. O efeito perceptível ao focarmos na temporada como um todo é que a queda das notas das temporadas de tamanho 40 aparenta ficar mais nítida.   
+Observando as **notas por tamanho mediano da temporada** vemos que a distribuição das notas se comporta semelhantemente as **notas por tamanho de temporada.**  
+O efeito perceptível de focarmos nas **notas por tamanho mediano da temporada** é que a queda das notas das temporadas de tamanho 40 aparenta fica mais nítida.     
 
 ```{r}
 episodes %>%
@@ -354,7 +377,7 @@ episodes %>%
          x = "Tamanho mediano da temporada")
 ```
 
-O boxplot mostra resultados semelhantes aos fornecidos pela análise das notas por tamanho da temporada.
+O boxplot mostra resultados semelhantes aos fornecidos pela análise das **notas por tamanho de temporada.**  
     
 ### O tamanho da temporada afeta o consenso?
 
@@ -370,7 +393,8 @@ episodes %>%
          x = "Tamanho da temporada")
 ```
 
-**O grau de consenso das temporadas com mais de 30 episódios, em sua maior parte, permanece na faixa entre 0.2 e 0.5 de consenso** (entre 20% e 50% de consenso). Existe um grande dispersão em termos de grau de consenso para temporada com até 30 episódios. Isso poderia sugerir que o tamanho da temporada não é a informação adequada para explicar o consenso das temporadas nessa faixa de número de episódios.
+**O grau de consenso das temporadas com mais de 30 episódios, em sua maior parte, permanece na faixa entre 0.2 e 0.5 de consenso** (entre 20% e 50% de consenso).  
+Existe um grande dispersão em termos de grau de consenso para temporada com até 30 episódios. Isso poderia sugerir que o tamanho da temporada não é a informação adequada para explicar o consenso das temporadas nessa faixa de número de episódios.
 
 <br></br>
 
@@ -382,7 +406,7 @@ episodes %>%
 <br></br>
 
 * Para temporadas de até 30 episódios o tamanho da temporada não parece ser a informação adequada para explicar o grau de consenso. 
-    + **Para temporadas de mais de 30 episódios o tamanho da temporada aparenta ter um efeito limitador sobre o grau de consenso**, que é em geral não passa de 0.5 (50%). Temporadas muito grandes poderiam induzir qualidade irregular como por exemplo episódios filler.
+    + **Para temporadas de mais de 30 episódios o tamanho da temporada aparenta ter um efeito limitador sobre o grau de consenso**, que em geral não passa de 0.5 (50%). Temporadas muito grandes poderiam induzir qualidade irregular como por exemplo episódios filler.
 
 ***
 
@@ -401,7 +425,7 @@ episodes %>%
 
 ```
 
-Existe um vísivel acréscimo no numero de votos quando passamos de notas em torno de 7. **Na faixa de notas entre 8 e 10 é perceptível um grande aumento no número de votos**.  
+Existe um vísivel acréscimo no número de votos quando subimos as notas para além de 7. **Na faixa de notas entre 8 e 10 é perceptível um grande aumento no número de votos**.  
 
 ```{r}
 episodes %>% 
@@ -416,7 +440,8 @@ episodes %>%
          x = "Nota dada pelo usuário")
 ```
 
-Como já foi dito anteriormente a nota 8 é um ponto de particular interesse (moda) para a distribuição das notas. A média (linha vermelha) e a mediana (linha verde) também convergem para essa nota. Por ese motivo **iremos comparar o consenso entre os episódios cujas notas estão abaixo de 8 (não bem_avaliado) com os que cujas notas estão acima de 8 (bem_avaliado)**.  
+Como já foi dito anteriormente a nota 8 é um ponto de particular interesse (moda) para a distribuição das notas. A média (linha vermelha) e a mediana (linha verde) também convergem para essa nota.    
+Por esse motivo **iremos comparar o consenso entre os episódios cujas notas estão abaixo de 8 (não bem_avaliado) com os que cujas notas estão acima de 8 (bem_avaliado)**.   
 
 ```{r}
 episodes <- 
@@ -439,7 +464,7 @@ episodes %>%
             labs(x = "Número de votos")
 ```
 
-Resultados semelhantes à dispersão sem distinção dos bem avaliados. É ainda mais nítida a ligação entre notas mais altas e maior número de votos. 
+Resultados semelhantes à dispersão sem distinção dos bem avaliados (número de votos por nota dada pelo usuário). É ainda mais nítida a ligação entre notas mais altas e maior número de votos. 
 
 ### Os episódios mais bem avaliados geram mais consenso?
 
@@ -453,7 +478,7 @@ episodes %>%
 
 ```
 
-Curiosamente a massa de maior densidade de ocorrências (parte mais escura) dos dois grupos é relativamente próxima uma da outra, ainda assim é possível perceber que a massa das ocorrências dos bem avaliados está mais à direita (maior grau de consenso).       
+Curiosamente a massa de maior densidade de ocorrências (parte mais escura) dos dois grupos é relativamente próxima uma da outra, ainda assim é possível perceber que _a massa das ocorrências dos bem avaliados está mais à direita (maior grau de consenso)_.       
 
 **Os episódios bem avalidos geram mais consenso**, ocorrências acima dos 0.5/50% são mais frequentes nos bem avaliados e em geral a massa das ocorrências dos bem avaliados está mais à direita (maior grau de consenso) do que os não bem avaliados. 
 
