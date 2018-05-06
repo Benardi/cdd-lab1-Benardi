@@ -11,7 +11,9 @@ output:
     toc_float: yes
 ---
 
-## Conjunto de dados utilizado
+## Introdução
+
+### Conjunto de dados utilizado
 
 > Análise exploratória de dados do [IMDB](https://www.imdb.com/)  sobre seriados de TV e Streaming. Os dados originais e as variáveis vem [deste repositorio](https://github.com/nazareno/imdb-series) . Lá tem a explicação de como os dados foram gerados e do significado de cada variável.
 
@@ -32,6 +34,26 @@ episodes <- read_csv(here("data/series_from_imdb.csv"),
 episodes %>% 
     glimpse()
 ```
+
+### Pequena explicação sobre estimadores empregados
+
+```
+- Média: é a soma dos valores dos elementos de um conjunto dividido pelo número de elementos nesse conjunto.
+- Mediana: é o valor que dentro de um conjunto de valores ordenados numericamente os divide em 50% maiores e 50% menores.
+- IQR: em um conjunto de valores ordenados numericamente contém os 50% centrais dos valores, e.g. se tivessemos uma sequência de 1 até 100 o IQR iria de 25 até 75 (os 50 valores do meio).
+
+```
+
+```{r}
+x<-rnorm(100000,mean=10, sd=2);
+qqnorm(x, pch = 1, frame = FALSE);
+qqline(x, col = "red", lwd = 2);
+```
+
+O gráfico Q-Q Plot será usado pra descrever dados que serão usados na análise. O Q-Q Plot de uma distribuição bem comportada (normal, simétrica..) é bem alinhado como no gráfico exemplo.
+
+
+***
 
 ## Data Overview
 
@@ -112,7 +134,7 @@ episodes %>%
 episodes %>% 
     group_by(episode) %>%
     ggplot(aes(sample=user_votes)) + 
-        stat_qq() 
+        stat_qq()
 ```
 
 ### Avaliação dos usuários
@@ -126,7 +148,6 @@ episodes %>%
                    color="black") +
     labs(x = "Nota do episódio",
          y = "Densidade de frequência")
-
 ```
 
 ```{r}
@@ -216,6 +237,7 @@ episodes %>%
         stat_qq() 
 ```
 
+***
 
 ## Temporadas mais curtas são mais bem avaliadas?
 
@@ -305,9 +327,9 @@ episodes %>%
     geom_point(alpha=0.3) +
     labs(y = "Grau de consenso",
          x = "Tamanho da temporada")
-    
 ```
 
+***
 
 ## Os episódios que recebem mais votação são episódios mais bem avaliados?
 
