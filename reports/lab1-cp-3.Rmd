@@ -281,10 +281,19 @@ episodes %>%
                season_size)) +
     geom_point(alpha=0.08,
                color="#ff6666") +
+        scale_y_continuous(breaks=seq(0,100,5)) +
         scale_x_continuous(breaks=seq(0,10,1)) +
           labs(x = "Nota dada pelo usuário",
          y = "Tamanho da temporada")
 ```
+
+Temporadas entre 1 e 25 episódios são visivelmente dispersas, com valores indo de 3 até 10,  já que a maior parte das ocorrências está nessa faixa. Apesar disto também **é visível que a maior parcela das ocorrência gira em torno da nota 8 (mais ou menos entre 7 e 9)**. Esse padrão em geral se mantém a despeito do tamanho da temporada e *está em acordo com a moda da distribuição das notas que é 8*. 
+
+Existe porém duas exceções:
+
+ * Para as temporadas de aproximadamente 40 episódios existe uma notável queda das notas
+ * Nas temporas acima dos 40 episódios parece haver um aumento da nota dada pelos usuários, mas sua relevância não parece clara ou forte.
+
 
 ```{r}
 episodes %>%
@@ -294,27 +303,16 @@ episodes %>%
                group=season_size)) +
     geom_boxplot(position = "dodge",
                  outlier.shape = NA,
-                 coef = 0,
                  color="#ff6666") +
     scale_x_continuous(breaks=seq(0,90,5)) +
+    scale_y_continuous(breaks=seq(0,10,1)) +
     labs(y = "Nota dada pelo usuário",
          x = "Tamanho da temporada")
 ```
 
-```{r}
-summary <-  episodes %>%
-    filter(series_name != "Yu Yu Hakusho") %>%
-    group_by(season_size) %>%
-    summarise(mean_usr_rating = mean(user_rating))
+Falemos agora dos boxplots focando em termos de mediana, por isso desconsideraremos os pontos externos  para ter uma visão mais limpa no gráfico. Em termos de mediana  **o que foi visto no gráfico se repete com a queda nas temporadas em torno de 40 episódios**. 
 
-summary %>%
-    ggplot(aes(season_size, 
-       mean_usr_rating,color=season_size)) + 
-    geom_point() +
-    scale_x_continuous(breaks=seq(0,90,5)) +
-        labs(y = "Nota Mediana",
-             x = "Tamanho da temporada")
-```
+* Os limites inferiores e superiores dos boxplots **(bigodes dos boxplots) mostram o aumento acima do ponto dos 40 episódios como não tão relevantes**, pois os boxplots mais acima (os acima de 40 episódios) estão contidos na faixa compreendida pelos limites pelos boxplots 'aparentemente' abaixo.
 
 ### Séries cujas temporadas são mais curtas são mais bem avaliadas?
 
@@ -326,10 +324,14 @@ episodes %>%
     ggplot(aes(user_rating,
                median_season_size)) +
     geom_point(alpha = 0.1, color="#A58AFF") +
+    scale_y_continuous(breaks=seq(0,100,5)) +
+    scale_x_continuous(breaks=seq(0,10,1)) +
         labs(x = "Nota dada pelo usuário",
-         y = "Tamanho mediano da temporada")
+             y = "Tamanho mediano da temporada")
 
 ```
+
+Observando a nota por tamanho mediano da temporada  vemos que a distribuição das notas se comporta semelhantemente a quando a observamos do ponto de vista da temporada. O efeito perceptível ao focarmos na temporada como um todo é que a queda das notas das temporadas de tamanho 40 aparenta ficar mais nítida.   
 
 ```{r}
 episodes %>%
@@ -345,20 +347,40 @@ episodes %>%
                  fill="#A58AFF",
                  width=0.5) +
     scale_x_continuous(breaks=seq(0,90,5)) +
+    scale_y_continuous(breaks=seq(0,10,1)) +
         labs(y = "Nota dada pelo usuário",
          x = "Tamanho mediano da temporada")
 ```
 
+O boxplot mostra resultados semelhantes aos fornecidos pela análise das notas por tamanho da temporada.
+    
 ### O tamanho da temporada afeta o consenso?
 
 ```{r}
 episodes %>%
     filter(series_name != "Yu Yu Hakusho") %>%
+    group_by(series_name,season) %>%
     ggplot(aes(season_size,consensus)) +
     geom_point(alpha=0.3) +
+    scale_y_continuous(breaks=seq(0,1,0.1)) +
+    scale_x_continuous(breaks=seq(0,100,5)) +
     labs(y = "Grau de consenso",
          x = "Tamanho da temporada")
 ```
+
+**O grau de consenso das temporadas com mais de 30 episódios, em sua maior parte, permanece na faixa entre 0.2 e 0.5 de consenso** (entre 20% e 50% de consenso). Existe um grande dispersão em termos de grau de consenso para temporada com até 30 episódios. Isso poderia sugerir que o tamanho da temporada não é a informação adequada para explicar o consenso das temporadas nessa faixa de número de episódios.
+
+<br></br>
+
+### Conclusão
+
+* O tamanho da temporada em geral não gera um efeito significativo na nota das séries. **Tamanho de temporada não condiz com temporada maior ou melhor olhando pra temporada isoladamente ou pro tamanho mediano das temporadas de uma série.** 
+    + A exceção ao que foi dito antes é que existe nas notas para as temporadas (e para o  tamanho mediano das temporadas de uma série) em torno de 40 episódios uma palpável queda nas notas. 
+
+<br></br>
+
+* Para temporadas de até 30 episódios o tamanho da temporada não parece ser a informação adequada para explicar o grau de consenso. 
+    + **Para temporadas de mais de 30 episódios o tamanho da temporada aparenta ter um efeito limitador sobre o grau de consenso**, que é em geral não passa de 0.5 (50%). Temporadas muito grandes poderiam induzir qualidade irregular como por exemplo episódios filler.
 
 ***
 
