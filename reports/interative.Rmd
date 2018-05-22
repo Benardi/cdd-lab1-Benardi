@@ -49,27 +49,14 @@ episodes <- left_join(episodes, sumario_simples,
 episodes
 ```
 
-
-```{r}
- p <- episodes %>% 
-          ggplot(aes(x = series_name,
-                 y = user_rating,
-                 color=series_name)) + 
-        facet_wrap(~ season) + 
-        geom_boxplot(position = position_dodge(width = 0.9)) +
-        theme(axis.title.x=element_blank(),
-              axis.text.x=element_blank(),
-              axis.ticks.x=element_blank())
-
-ggplotly(p)
-```
-
 ```{r}
 p <-  episodes %>% 
       ggplot(aes(x = series_name, y = user_rating, color=middle_eps)) + 
-        geom_boxplot(alpha =0.3) +
+        geom_jitter(width = 0.3, alpha=0.7) +
         facet_wrap(~ season) +
         coord_flip()
 
 ggplotly(p)
 ```
+
+
