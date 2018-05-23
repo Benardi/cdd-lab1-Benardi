@@ -3,11 +3,11 @@ title: "EDA Interativa sobre séries no IMDB"
 subtitle: ''
 author: "José Benardi de Souza Nunes"
 output:
-  html_document:
-    df_print: paged
+  html_notebook:
     toc: yes
     toc_float: yes
-  html_notebook:
+  html_document:
+    df_print: paged
     toc: yes
     toc_float: yes
 ---
@@ -34,29 +34,66 @@ episodes <- read_csv(here("data/series_from_imdb.csv"),
                                      series_name = col_character(), 
                                      episode = col_character(), 
                                      url = col_character(),
-                                     season = col_character())) 
+                                     season = col_character())) %>% 
+    filter(series_name %in% c("Game of Thrones","Xena a Princesa Guerreira")) 
+
 episodes %>% 
     glimpse()
 ```
 
+****
+
+### Episódios da metade da temporada
+
+>A título de tornar nossa discussão mais interessante vamos gerar uma nova informação : "Um episódio faz parte da metade da temporada?" (*middle_eps*). Um episódio é da metade da temporada se está entre os 60% dos episódios centrais de uma temporada.  
+
 ```{r}
+sumario_simples <- 
+    episodes %>% 
+    select(season_ep,season,series_name) %>%
+    group_by(series_name,season) %>% 
+    summarise(n = n(),
+               p20 = quantile(seq(from=1, to=n, by=1), 0.20),
+               p80 = quantile(seq(from=1, to=n, by=1), 0.80))
+
 episodes <- left_join(episodes, sumario_simples,
                       by = c("series_name", "season")) %>% 
     group_by(series_name, season) %>%
     mutate(middle_eps = (season_ep > p20) &
                (season_ep < p80)) %>% 
     ungroup()
-episodes
+episodes %>% 
+    select(series_name, series_ep, middle_eps)
 ```
 
-```{r}
-p <-  episodes %>% 
-      ggplot(aes(x = series_name, y = user_rating, color=middle_eps)) + 
+***
+
+### E aí, quem se saiu melhor?
+
+
+```{r, warning=FALSE, message=FALSE}
+m <- list(
+  b = 100,
+  r = 200,
+  t = 75
+  )
+
+p <- episodes %>% 
+      ggplot(aes(x = series_name, y = user_rating, 
+                 color=middle_eps,
+                 group=episode)) + 
         geom_jitter(width = 0.3, alpha=0.7) +
         facet_wrap(~ season) +
-        coord_flip()
+        xlab("") +
+        ylab("Votação do Usuário") +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1))  +
+        scale_x_discrete(labels=c("GOT", "Xena")) +
+        labs(color='Metade da temporada?') +
+        ggtitle(paste("GOT x Xena (Temporada a Temporada)")) +
+        theme_update(plot.title = element_text(hjust = -1))
 
-ggplotly(p)
+ggplotly(p, tooltip = c("episode", "x","y")) %>%
+  layout(autosize = F, margin = m)
 ```
 
 
