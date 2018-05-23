@@ -117,3 +117,20 @@ ggplotly(p, tooltip = "text") %>%
 
 É possível perceber que **ao longo de todas as seis temporadas** (na 5ª e 6ª temporada sendo menos unânime), quer sejam episódios do $\color{red}{\text{começo/metade da temporada}}$, quer sejam $\color{blue}{\text{do meio da temporada}}$, **Game of Thrones (GOT) tem avaliações mais altas que Xena a Princeisa Guerreira (Xena)**.  
 
+***
+
+### Episódios mais bem avaliados (Curiosidade)
+
+Entre os concorrentes a pontuação mais alta (**9,9**) em Game of Thrones temos um relativo domínio de episódios de começo/fim de temporadas (**exceto na 4ª e 5ª temporada**).
+
+* $\color{red}{\text{The Rains of Castemere}}$ : Episódio que partiu o coração de muitos fãs, sem dar spoilers dá pra dizer que teve gente cogitando abandonar a série tamanha foi a desilusão.
+
+* $\color{red}{\text{The Battle of Bastard }}$ e $\color{red}{\text{The Winds of Winter}}$ : Episódios relacionados à maior batalha encenada em toda a série, e de longe uma das sequências mais esperadas da série. 
+
+* $\color{blue}{\text{Hardhome}}$ : Esse episódio da **5ª temporada**, teve efeitos cinematográficos de qualidade tão alta, que surgiram rumores que a qualidade visual de episódios posteriores dessa temporada foi afetada negativamente por falta de orçamento.
+
+Quanto **à 4ª temporada** (uma das duas exceções), embora não tenhamos episódios (**9,9**) nós temos um cluster de episódios bem avaliados de metade de temporada, os quais giram em torno de um certo episódio:
+
+* $\color{blue}{\text{The Mountain and The Viper}}$ : Clímax da narrativa de um dos personagens mais amados da série, o cluster mencionado anteriormente, que é o pico da temporada em termos de avaliação, casa perfeitamente com o desenrolar da narrativa desse personagem.
+
+
