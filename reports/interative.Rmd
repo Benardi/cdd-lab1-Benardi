@@ -1,5 +1,5 @@
 ---
-title: "EDA Interativa sobre séries no IMDB"
+title: "EDA sobre GOT x Xena (IMDB)"
 subtitle: ''
 author: "José Benardi de Souza Nunes"
 output:
@@ -16,9 +16,19 @@ output:
 
 ## Introdução
 
+***
+
+Vamos comparar as séries *Game of Thrones* e *Xena a Princesa Guerreira* para responder :
+
+ * Qual das duas é mais bem avaliada pelos usuários?
+    + A diferença se mantém ao longo das temporadas?
+    + Existe efeito por ser começo/fim ou metade da temporada? 
+
+***
+
 ### Conjunto de dados utilizado
 
-> Análise exploratória de dados do [IMDB](https://www.imdb.com/)  sobre seriados de TV e Streaming. Os dados originais e as variáveis vêm [deste repositorio](https://github.com/nazareno/imdb-series) . Lá consta a explicação de como os dados foram gerados e do significado de cada variável.
+> Análise exploratória de dados do [IMDB](https://www.imdb.com/)  sobre as séries Game of Thrones e Xena a Princesa Guerreira. Os dados originais e as variáveis vêm [deste repositorio](https://github.com/nazareno/imdb-series) . Lá consta a explicação de como os dados foram gerados e do significado de cada variável.
 
 ```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
 library(tidyverse)
@@ -68,13 +78,13 @@ episodes %>%
 
 ***
 
-### E aí, quem se saiu melhor?
+## E aí, quem se saiu melhor?
 
 
 ```{r, warning=FALSE, message=FALSE}
 m <- list(
   b = 100,
-  r = 200,
+  r = 185,
   t = 75
   )
 
@@ -96,4 +106,5 @@ ggplotly(p, tooltip = c("episode", "x","y")) %>%
   layout(autosize = F, margin = m)
 ```
 
+É possível perceber que **ao longo de todas as seis temporadas** (na 5ª e 6ª temporada sendo menos unânime), quer sejam episódios do $\color{red}{\text{começo/metade da temporada}}$, quer sejam $\color{blue}{\text{do meio da temporada}}$, **Game of Thrones (GOT) tem avaliações mais altas que Xena a Princeisa Guerreira (Xena)**.  
 
