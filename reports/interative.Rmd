@@ -3,11 +3,11 @@ title: "EDA sobre GOT x Xena (IMDB)"
 subtitle: ''
 author: "José Benardi de Souza Nunes"
 output:
-  html_notebook:
-    toc: yes
-    toc_float: yes
   html_document:
     df_print: paged
+    toc: yes
+    toc_float: yes
+  html_notebook:
     toc: yes
     toc_float: yes
 ---
@@ -80,6 +80,11 @@ episodes %>%
 
 ## E aí, quem se saiu melhor?
 
+<br></br>
+
+Comparemos então as avaliações dadas aos episódios das duas séries ao longo de suas **6 temporadas:**
+
+<br></br>
 
 ```{r, warning=FALSE, message=FALSE}
 m <- list(
@@ -91,7 +96,11 @@ m <- list(
 p <- episodes %>% 
       ggplot(aes(x = series_name, y = user_rating, 
                  color=middle_eps,
-                 group=episode)) + 
+                 group=episode, text = paste(
+                    "Série:", series_name,
+                    "\nEpisódio:", episode,
+                    "\nAvaliação:", user_rating
+                     ))) + 
         geom_jitter(width = 0.3, alpha=0.7) +
         facet_wrap(~ season) +
         xlab("") +
@@ -102,7 +111,7 @@ p <- episodes %>%
         ggtitle(paste("GOT x Xena (Temporada a Temporada)")) +
         theme_update(plot.title = element_text(hjust = -1))
 
-ggplotly(p, tooltip = c("episode", "x","y")) %>%
+ggplotly(p, tooltip = "text") %>%
   layout(autosize = F, margin = m)
 ```
 
