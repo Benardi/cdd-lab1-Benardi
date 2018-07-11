@@ -1,5 +1,5 @@
 ---
-title: "EDA on series ratings on IMDB"
+title: "EDA about series ratings on IMDB"
 subtitle: 'Is there a connection between season length, number of votes, ratings and consensus?'
 author: "José Benardi de Souza Nunes"
 date: 06/05/2018
