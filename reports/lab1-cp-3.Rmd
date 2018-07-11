@@ -1,24 +1,24 @@
 ---
-title: "EDA sobre séries no IMDB"
-subtitle: 'Existe relação entre tamanho da temporada, número de votos, notas e consenso?'
+title: "EDA on IMDB Series"
+subtitle: 'Is there connection between season length, number of votes, ratings and consensus?'
 author: "José Benardi de Souza Nunes"
 output:
-  html_document:
-    df_print: paged
+  html_notebook:
     toc: yes
     toc_float: yes
-  html_notebook:
+  html_document:
+    df_print: paged
     toc: yes
     toc_float: yes
 ---
 
 <br></br>
 
-## Introdução
+## Introduction
 
-### Conjunto de dados utilizado
+### Analyzed Dataset
 
-> Análise exploratória de dados do [IMDB](https://www.imdb.com/)  sobre seriados de TV e Streaming. Os dados originais e as variáveis vêm [deste repositorio](https://github.com/nazareno/imdb-series) . Lá consta a explicação de como os dados foram gerados e do significado de cada variável.
+> Exploratory Data Analysis on data from [IMDB](https://www.imdb.com/)  about TV series and Streaming. The original data and variables come from [this repository](https://github.com/nazareno/imdb-series) . There we have explained how the data was retrieved and the meaning of each variable.
 
 ```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
 library(tidyverse)
@@ -38,16 +38,15 @@ episodes %>%
     glimpse()
 ```
 
-### Pequena explicação sobre estimadores empregados
+### Small explanation about employed estimators
 
 <br></br>
     
 ```
-- Média: é a soma dos valores dos elementos de um conjunto dividido pelo número de elementos nesse conjunto.
-- Moda: é o valor mais frequente dentro de um conjunto de valores.
-- Mediana: é o valor que dentro de um conjunto de valores ordenados numericamente os divide em 50% maiores e 50% menores.
-- IQR: em um conjunto de valores ordenados numericamente contém os 50% centrais dos valores, e.g. se tivessemos uma sequência de 1 até 100 o IQR iria de 25 até 75 (os 50 valores do meio).
-
+- Mean: the sum of the values of the elements of a group divided by the number of elements in that group.
+- Mode: the most frequent element inside a group of values.
+- Median: the value inside a group of sorted values that divides them into 50% bigger and 50% smaller.
+- IQR: in a group of sorted values contains the 50% central values, e.g. if we had a sequence going from 1 to 100 the IQR would go from 25 to 75 (the 50 central values).
 ```
 
 ```{r}
@@ -56,13 +55,13 @@ qqnorm(x, pch = 1, frame = FALSE);
 qqline(x, col = "red", lwd = 2);
 ```
 
-O gráfico Q-Q Plot (gráfico de quantis) será usado pra descrever dados que serão usados na análise. O Q-Q Plot de uma distribuição bem comportada (normal, simétrica..) é bem alinhado como no gráfico exemplo.  
+The Q-Q Plot (quantile-quantile plot) will be employed to describe metrics used in this analysis. The Q-Q Plot of a well behaved distribution (gaussian, symetric..) is well aligned as in the example chart.  
 
 ***
 
 ## Data Overview
 
-### Número de votos de um dado episódio
+### Number of votes of a certain episode
 
 ```{r}
 episodes %>%
@@ -73,18 +72,18 @@ episodes %>%
                    fill="grey",
                    color="black") +
     scale_x_continuous(breaks=seq(0,9750,250)) +
-    labs(x = "Votos dos usuários",
-         y = "Densidade de frequência") +
+    labs(x = "User votes",
+         y = "Frequency density") +
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
-* Nitidamente temos uma moda entre 0 e 250 votos.
-* Os maiores valores são muito distantes do valor mais frequente, isso afeta a mediana e a média as tornando maiores que o valor mais frequente. 
-* Não existem valores que fujam ao domínio da grandeza (e.g. valores negativos) e que por isso invalidem nossa análise. 
+* We have a obvious mode between 0 and 250 votes.
+* The highest values are very far way from the mode, this impacts the distribution mean and median making them higher than the mode. 
+* The are no values that violate the nature of the quantity (e.g. negative values), and would therefore invalidate our analysis. 
 
 <br></br>
 
-Demos uma olhada nos _10 episódios mais votados_ entre todos:
+Let's look at the _10 most rated episodes_:
 
 
 ```{r}
@@ -94,7 +93,7 @@ episodes %>%
     arrange(desc(user_votes))
 ```
 
-Os top 3 episódios com mais votos são sensivelmente maiores do que o resto, em especial o primeiro colocado que está mais de 40.000 votos acima dos segundo colocado.
+The top 3 most voted episodes have a sensibly higher number of votes than the rest, particularly the most voted episode of all has 40.000 more votes than the second place.
 
 ```{r}
 episodes %>% 
@@ -103,7 +102,7 @@ episodes %>%
         stat_qq()
 ```
 
-* O gráfico de quantis representa claramente o salto nos valores máximos, os quais estão bem distantes do resto da distribuição de valores.
+* The quantile-quantile plot clearly shows the leap around the highest values, which are very far away from the rest of the distribution.
 
 ### Avaliação dos usuários
 
@@ -114,14 +113,14 @@ episodes %>%
     geom_histogram(binwidth = 0.1,
                    fill="grey",
                    color="black") +
-    labs(x = "Nota do episódio",
-         y = "Densidade de frequência") +
+    labs(x = "Episode Rating",
+         y = "Frequency density") +
         scale_x_continuous(breaks=seq(0,10,1)) 
 ```
 
-* A nota mais frequente é nitidamente em torno de 8.
-* A distribuição é *relativamente* bem comportada (simétrica), porém existe a ocorrência de notas mais baixas (entre 3 e 6). 
-* Não existem valores que fujam ao domínio da grandeza (e.g. valores negativos) e que por isso invalidem nossa análise.     
+* The most frequent rating is clearly around 8.
+* The distribution is *relatively* well behaved (symetric), there's however the occurrence of lower ratings (between 3 and 6). 
+* The are no values that violate the nature of the quantity (e.g. negative values), and would therefore invalidate our analysis.    
 
 ```{r}
 episodes %>% 
@@ -130,7 +129,7 @@ episodes %>%
         stat_qq() 
 ```
 
-* As notas baixas discutidas anteriormente afetam a curvatura da curva e atestam que as notas do episódio não formam de fato uma distribuição simétrica (bem comportada).
+* The lower ratings previously mentioned affect the curvature and prove that the distribution of episodes ratings do not compose a symetric distribution (well behaved).
 
 ### Tamanho das temporadas
 
@@ -160,18 +159,17 @@ episodes %>%
                    fill="grey",
                    color="black") +
     scale_x_continuous(breaks=seq(0,120,5)) +
-    labs(y = "Densidade de frequência", x = "Tamanho da temporada")
+    labs(y = "Frequency density", x = "Season length")
 
 ```
 
-* O tamanho de temporada mais frequente é em torno de 10 e em torno de 20 episódios (Duas modas ou bimodal).
-* Algumas poucas temporadas são curiosamente longas. 
-* Não existem valores que fujam ao domínio da grandeza (e.g. valores negativos) e que por isso invalidem nossa análise.  
+* The most frequent season length is around 10 and 20 episodes (Two modes ou bimodal).
+* Few seasons are curiously long. 
+* The are no values that violate the nature of the quantity (e.g. negative values), and would therefore invalidate our analysis.
 
 <br></br>
 
-Observermos as temporadas que **chamaram nossa atenção** por serem demasiadamente longas:
-
+Let's observe the seasons that **called our attention** for being too long:
 
 ```{r}
 episodes %>%
@@ -183,7 +181,7 @@ episodes %>%
     arrange(desc(season_size))
 ```
 
-A série *Yu Yu Hakusho* que possui 4 temporadas está tendos todos seus episódios erroneamente marcados como da primeira temporada. Por esse motivo não incluiremos a série *Yu Yu Hakusho* na análise referente a tamanho das temporadas.
+The series *Yu Yu Hakusho* which has 4 seasons is being wrongly classified as a single whole season. For this reason, we shall not include the series *Yu Yu Hakusho* in our analysis regarding seasons.
 
 ```{r}
 episodes %>% 
@@ -192,7 +190,7 @@ episodes %>%
     stat_qq() 
 ```
 
-* No Q-Q plot  existe uma quebra (descontinuidade), isso casa com o histograma pois temos duas modas (valores mais frequentes).  
+* In the Q-Q plot there's a step (descontinuity), which matches the two modes on the respective histogram (two most frequent values).  
 
 
 
