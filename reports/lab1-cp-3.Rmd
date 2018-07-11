@@ -1,6 +1,6 @@
 ---
 title: "EDA on IMDB Series"
-subtitle: 'Is there connection between season length, number of votes, ratings and consensus?'
+subtitle: 'Is there a connection between season length, number of votes, ratings and consensus?'
 author: "José Benardi de Souza Nunes"
 output:
   html_notebook:
@@ -104,7 +104,7 @@ episodes %>%
 
 * The quantile-quantile plot clearly shows the leap around the highest values, which are very far away from the rest of the distribution.
 
-### Avaliação dos usuários
+### Episode rating
 
 ```{r}
 episodes %>% 
@@ -129,19 +129,19 @@ episodes %>%
         stat_qq() 
 ```
 
-* The lower ratings previously mentioned affect the curvature and prove that the distribution of episodes ratings do not compose a symetric distribution (well behaved).
+* The lower ratings previously mentioned affect the curvature and prove that the distribution of episodes ratings does not compose a symetric distribution (well behaved).
 
-### Tamanho das temporadas
+### Season length
 
 ```{r}
 sumario_n_seasons <- episodes %>%
     group_by(series_name, season) %>%
-    summarise(season_size = n()) 
+    summarise(season_length = n()) 
 
 episodes <- left_join(episodes, sumario_n_seasons, by= c("series_name","season")) 
 
 episodes %>% 
-    select(series_name, season, season_size) %>% 
+    select(series_name, season, season_length) %>% 
     unique() %>%
     sample_n(10)
 ```
@@ -150,9 +150,9 @@ episodes %>%
 episodes %>%
     select(series_name,
            season,
-           season_size) %>% 
+           season_length) %>% 
     unique() %>%
-    ggplot(aes(season_size,..density..)) + 
+    ggplot(aes(season_length,..density..)) + 
     geom_density(aes(y= 2.5 *..density..),
              color="lightpink") +
     geom_histogram(binwidth = 1, 
@@ -175,10 +175,10 @@ Let's observe the seasons that **called our attention** for being too long:
 episodes %>%
     select(series_name,
            season,
-           season_size) %>% 
+           season_length) %>% 
     unique() %>% 
-    top_n(10, season_size) %>% 
-    arrange(desc(season_size))
+    top_n(10, season_length) %>% 
+    arrange(desc(season_length))
 ```
 
 The series *Yu Yu Hakusho* which has 4 seasons is being wrongly classified as a single whole season. For this reason, we shall not include the series *Yu Yu Hakusho* in our analysis regarding seasons.
@@ -186,71 +186,69 @@ The series *Yu Yu Hakusho* which has 4 seasons is being wrongly classified as a 
 ```{r}
 episodes %>% 
     filter(series_name != "Yu Yu Hakusho") %>%
-    ggplot(aes(sample=season_size)) +
+    ggplot(aes(sample=season_length)) +
     stat_qq() 
 ```
 
 * In the Q-Q plot there's a step (descontinuity), which matches the two modes on the respective histogram (two most frequent values).  
 
+### Median season length of a series
 
+To represent the overall season length of a series we will make use of the estimator median. Among the reasons to choose the median over other estimators such as the mean or the trimmed mean we give:
 
-### Tamanho mediano da temporada de uma série
-
-Para representar o tamanho geral da temporada de uma série, faremos uso da mediana. Entre os argumentos para obtar pela mediana ao invés de outras medidas como uma média ou média aparada listamos:
-
-* A mediana torna menos recorrente o aparecimento de valores não inteiros (e.g. 4,6) que não fariam sentido para algo como o tamanho de uma série.
-* A mediana é uma medida robusta, ou seja ela é menos facilmente afetada por valores extremos.
+* The median less frequently provides values that aren't integers (e.g. 4.6) which would make no sense as something as a season length.
+* The median is a robust meausre, in other words it's less easily affected by outliers.
 
 ```{r}
-summary_season_size <- episodes %>%
+summary_season_length <- episodes %>%
     group_by(series_name) %>%
-    summarize(median_season_size = median(season_size)) %>%
+    summarize(median_season_length = median(season_length)) %>%
     ungroup()
 
-episodes <- left_join(episodes, summary_season_size,
+episodes <- left_join(episodes, summary_season_length,
                       by = c("series_name")) 
 
 episodes %>% 
     filter(series_name != "Yu Yu Hakusho") %>%
     select(series_name,
            season_ep,
-           median_season_size) %>%
+           median_season_length) %>%
     sample_n(10)
 ```
 
 ```{r}
 episodes %>%
     filter(series_name != "Yu Yu Hakusho") %>%
-    select(series_name, median_season_size) %>% 
+    select(series_name, median_season_length) %>% 
     unique() %>%
-    ggplot(aes(median_season_size,..density..)) +
+    ggplot(aes(median_season_length,..density..)) +
     geom_density(aes(y= 2.5 *..density..),
                  color="red") +
     geom_histogram(binwidth = 1,
                    fill="grey",
                    color="black") +
     scale_x_continuous(breaks=seq(0,120,5)) +
-        labs(x = "Tamanho mediano de temporada",
-         y = "Densidade de frequência")
+        labs(x = "Median season length",
+         y = "Frequency density")
 
 ```
 
-* O tamanho mediano da temporada se comporta semelhantemente ao tamanho de uma temporada.
+* The median season length behaves similarly to the metric seaosn length.
 
 ```{r}
 episodes %>%
     filter(series_name != "Yu Yu Hakusho") %>%
-    select(series_name, median_season_size) %>% 
+    select(series_name, median_season_length) %>% 
     unique() %>%
-    ggplot(aes(sample=median_season_size)) + 
+    ggplot(aes(sample=median_season_length)) + 
         stat_qq() 
 ```
 
-* O tamanho mediano da temporada mais uma vez se comporta semelhantemente ao tamanho de uma temporada.
+* The median season length once again behaves similarly to the metric seaosn length.
 
-### Consenso em relação à nota de um episódio
+### Consensus about a episode rating
 
-Geramos a informação de consenso como o máximo entre as frequências relativas das possíveis notas  de 1 até 10 (r1 até r10), pois quanto mais elevado esse máximo maior a proporção de pessoas cujas notas coincidiram. 
+We generated the metric consensus as the maximum relative frequency of the ratings a episode can be given from 1 to 10 (r1 to r10). The more concentrated around a certain rating a episode is the more people agreed on its rating. 
 
 ```{r}
 episodes <- episodes %>%
@@ -272,14 +270,14 @@ episodes %>%
                    fill="grey",
                    color="black") +
     scale_x_continuous(breaks=seq(0,1,0.125)) +
-    labs(x = "Grau de consenso",
-         y = "Densidade de frequência")
+    labs(x = "Level of Consensus",
+         y = "Frequency density")
 
 ```
 
-* A moda do grau de consenso está em torno de 0.3125, ou seja o mais frequente foi 31,25% das pessoas darem a mesma nota ao episódio.   
-* Valores mais altos indo até em torno de 87,50% de consenso ocorrem.  
-* Não existem valores que fujam ao domínio da grandeza (e.g. valores negativos) e que por isso invalidem nossa análise.         
+* Level of Consensus mode is around 0.3125, in other words most of the time 31.25% of people gave the same rating to an episode.   
+* Higher levels of consensus occur, going up to around 87.50%.  
+* The are no values that violate the nature of the quantity (e.g. negative values), and would therefore invalidate our analysis.        
 
 ```{r}
 episodes %>%
@@ -289,54 +287,53 @@ episodes %>%
         stat_qq() 
 ```
 
-* Os valores altos e distantes da moda afetam a curvatura do gráfico de quantis, o qual atesta que a distribuição do grau de consenso não é bem comportada (simétrica).
+* The higher values which are far away from the mode affect the curvature and prove that the distribution of level of consensus does not compose a symetric distribution (well behaved).
 
 ***
 
-## Temporadas mais curtas são mais bem avaliadas?
+## Are shorter seasons better rated?
 
 ```{r}
 episodes %>%
     filter(series_name != "Yu Yu Hakusho") %>%
     ggplot(aes(user_rating,
-               season_size)) +
+               season_length)) +
     geom_point(alpha=0.08,
                color="#ff6666") +
         scale_y_continuous(breaks=seq(0,100,5)) +
         scale_x_continuous(breaks=seq(0,10,1)) +
-          labs(x = "Nota dada pelo usuário",
-         y = "Tamanho da temporada")
+          labs(x = "User rating",
+         y = "Season length")
 ```
 
-Temporadas entre 1 e 25 episódios são visivelmente dispersas, com valores indo de 3 até 10,  já que a maior parte das ocorrências está nessa faixa. Apesar disso também **é visível que a maior parcela das ocorrência gira em torno da nota 8 (mais ou menos entre 7 e 9)**. Esse padrão em geral se mantém a despeito do tamanho da temporada e *está em acordo com a moda da distribuição das notas que é 8*. 
+Seasons between 1 and 25 episodes are visibly disperse, with ratings ranging from 3 to 10, as most seasons are around this number of episodes. Despite the aforementioned it's also **visible that most of the occurrences have ratings around 8 (more or less between 7 and 9)**. This pattern overall holds desite the season length and *matches the distribution of ratings mode which is 8*. 
 
-Existe porém duas exceções:
+There are however, two exceptions:
 
- * Para as temporadas de aproximadamente 40 episódios existe uma notável queda das notas
- * Nas temporas acima dos 40 episódios parece haver um aumento da nota dada pelos usuários, mas sua relevância não parece clara ou forte.
-
+ * For seasons around 40 episodes there's a sizable drop in terms of rating
+ * Seasons above 40 episodes seem to experience an increase on user ratings, their relevance doesn't seem clear or strong, however.
 
 ```{r}
 episodes %>%
     filter(series_name != "Yu Yu Hakusho") %>%
-    ggplot(aes(season_size, 
+    ggplot(aes(season_length, 
                user_rating, 
-               group=season_size)) +
+               group=season_length)) +
     geom_boxplot(position = "dodge",
                  outlier.shape = NA,
                  color="#ff6666") +
     scale_x_continuous(breaks=seq(0,90,5)) +
     scale_y_continuous(breaks=seq(0,10,1)) +
-    labs(y = "Nota dada pelo usuário",
-         x = "Tamanho da temporada")
+    labs(y = "User rating",
+         x = "Season length")
 ```
 
-Falemos agora dos boxplots focando em termos de mediana, por isso desconsideraremos os pontos externos  para ter uma visão mais limpa no gráfico. Em termos de mediana  **o que foi visto no gráfico de dispersão se repete com a queda nas notas das temporadas em torno de 40 episódios**. 
+Let's now talk about boxplots focusing in terms of median, for this reason we shall desconsider external points to have a clearer perspective of the chart. In terms of median *what was seen in the scatter plot repeats itself with the drop on the ratings of seasons around 40 episodes.*
 
-* Os limites inferiores e superiores dos boxplots **(bigodes dos boxplots) mostram o aumento das nota das temporadas com mais de 40 episódios como não tão relevantes**.
-    + Os boxplots destas temporadas ficam entre os limites dos boxplots das temporadas menores (Existe forte intersecção de valores).
+* The boxplot lower and upper limits **(boxplots' whiskers) shows that the increase in the ratings of seasons above 40 episodes doesn't seem very relevant**.
+    + The boxplot of these seasons are between the upper and lower limits of the boxplot of shorter seasons (There's a strong Intersection of values).
 
-### Séries cujas temporadas são mais curtas são mais bem avaliadas?
+### Series of shorter seasons are better rated?
 
 ```{r}
 episodes %>%
@@ -344,26 +341,26 @@ episodes %>%
     group_by(series_name) %>%
     unique() %>%
     ggplot(aes(user_rating,
-               median_season_size)) +
+               median_season_length)) +
     geom_point(alpha = 0.1, color="#A58AFF") +
     scale_y_continuous(breaks=seq(0,100,5)) +
     scale_x_continuous(breaks=seq(0,10,1)) +
-        labs(x = "Nota dada pelo usuário",
-             y = "Tamanho mediano da temporada")
+        labs(x = "User rating",
+             y = "Median season length")
 
 ```
 
-Observando as **notas por tamanho mediano da temporada** vemos que a distribuição das notas se comporta semelhantemente as **notas por tamanho de temporada.**  
-O efeito perceptível de focarmos nas **notas por tamanho mediano da temporada** é que a queda das notas das temporadas de tamanho 40 aparenta fica mais nítida.     
+Looking at the *ratings per median season length* we see that the distribution of ratings behaves similarly to the *ratings by season length*.
+The perceptible effect of focusing on the  *ratings by median season length* is the even sharper drop of user ratings around 40 episodes.     
 
 ```{r}
 episodes %>%
     filter(series_name != "Yu Yu Hakusho") %>%
     group_by(series_name) %>%
     unique() %>%
-    ggplot(aes(median_season_size,
+    ggplot(aes(median_season_length,
            user_rating,
-           group=median_season_size)) +
+           group=median_season_length)) +
     geom_boxplot(position = "dodge",
                  outlier.shape = NA,
                  coef = 0,
@@ -371,44 +368,44 @@ episodes %>%
                  width=0.5) +
     scale_x_continuous(breaks=seq(0,90,5)) +
     scale_y_continuous(breaks=seq(0,10,1)) +
-        labs(y = "Nota dada pelo usuário",
-         x = "Tamanho mediano da temporada")
+        labs(y = "User rating",
+         x = "Median season rating")
 ```
 
-O boxplot mostra resultados semelhantes aos fornecidos pela análise das **notas por tamanho de temporada.**  
+The boxplot shows similar results to those provided by the analysis of **ratings by season length.**  
     
-### O tamanho da temporada afeta o consenso?
+### Does season length affects consensus?
 
 ```{r}
 episodes %>%
     filter(series_name != "Yu Yu Hakusho") %>%
     group_by(series_name,season) %>%
-    ggplot(aes(season_size,consensus)) +
+    ggplot(aes(season_length,consensus)) +
     geom_point(alpha=0.3) +
     scale_y_continuous(breaks=seq(0,1,0.1)) +
     scale_x_continuous(breaks=seq(0,100,5)) +
-    labs(y = "Grau de consenso",
-         x = "Tamanho da temporada")
+    labs(y = "Level of consensus",
+         x = "Season length")
 ```
 
-**O grau de consenso das temporadas com mais de 30 episódios, em sua maior parte, permanece na faixa entre 0.2 e 0.5 de consenso** (entre 20% e 50% de consenso).  
-Existe um grande dispersão em termos de grau de consenso para temporada com até 30 episódios. Isso poderia sugerir que o tamanho da temporada não é a informação adequada para explicar o consenso das temporadas nessa faixa de número de episódios.
+**The level of consensus for seasons over 30 episodes, overall, remains between 0.2 and 0.5 of consensus** (consensus between 20% and 50%).  
+There's a considerable disperison in terms of level of consensus for seasons up till 30 episodes. This might suggest that the season length is not the appropriate characteristic to explain the level of consensus for seasons around that number of episodes.
 
 <br></br>
 
-### Conclusão
+### Conclusion
 
-* O tamanho da temporada em geral não gera um efeito significativo na nota das séries. **Tamanho de temporada não condiz com temporada maior ou melhor olhando pra temporada isoladamente ou pro tamanho mediano das temporadas de uma série.** 
-    + A exceção ao que foi dito antes é que existe nas notas para as temporadas (e para o  tamanho mediano das temporadas de uma série) em torno de 40 episódios uma palpável queda nas notas. 
+* Overall season length doesn't have a meaningful effect on a series rating. **Season length does not entail in a better or worse rated season looking either at exclusively at the season's length or ar the median length of a serie's season.** 
+    + The exception to the aforementioned is that for seasons (and series of median season length) above 40 episodes there's a sizable drop on user ratings. 
 
 <br></br>
 
-* Para temporadas de até 30 episódios o tamanho da temporada não parece ser a informação adequada para explicar o grau de consenso. 
-    + **Para temporadas de mais de 30 episódios o tamanho da temporada aparenta ter um efeito limitador sobre o grau de consenso**, que em geral não passa de 0.5 (50%). Temporadas muito grandes poderiam induzir qualidade irregular como por exemplo episódios filler.
+* For seasons up to 30 episodes the season length does not seem to provide the proper information to explain level of consensus. 
+    + **For seasons over 30 episodes the season length has a limiter effect on the level of consensus**, which in general does not go above 0.5 (50%). Specially large seasons could mean episodes of irregular quality, such as filler episodes.
 
 ***
 
-## Os episódios que recebem mais votação são episódios mais bem avaliados?
+## The most voted episodes are better rated?
 
 ```{r}
 episodes %>% 
@@ -418,12 +415,12 @@ episodes %>%
                position = position_jitterdodge()) +
     scale_y_continuous(breaks=seq(0,10,1)) +
     scale_x_continuous(breaks=seq(0,1000000,15000)) +
-    labs(y = "Nota dada pelo usuário",
-         x = "Número de votos")
+    labs(y = "User rating",
+         x = "Number of votes")
 
 ```
 
-Existe um vísivel acréscimo no número de votos quando subimos as notas para além de 7. **Na faixa de notas entre 8 e 10 é perceptível um grande aumento no número de votos**.  
+There's a visible increase in the number of votes when we look at the rating above 7. **In the range of ratings between 8 and 10 there's a perceptibly large increase in the number of votes**.  
 
 ```{r}
 episodes %>% 
@@ -434,55 +431,54 @@ episodes %>%
     geom_vline(xintercept = mean(episodes$user_rating), color = "darkred") + 
     geom_vline(xintercept = median(episodes$user_rating), color = "darkgreen") +
     scale_x_continuous(breaks=seq(0,10,0.5)) +
-    labs(y = "Densidade de frequência",
-         x = "Nota dada pelo usuário")
+    labs(y = "Frequency density",
+         x = "User rating")
 ```
 
-Como já foi dito anteriormente a nota 8 é um ponto de particular interesse (moda) para a distribuição das notas. A média (linha vermelha) e a mediana (linha verde) também convergem para essa nota.    
-Por esse motivo **iremos comparar o consenso entre os episódios cujas notas estão abaixo de 8 (não bem_avaliado) com os que cujas notas estão acima de 8 (bem_avaliado)**.   
+As has been said before, the rating 8 is a particularly interesting point (mode) in the distribution of ratings. The mean (red line) and the median (green line) also converge to that same rating. For this reason  **we will consider the consensus of the episodes whose ratings are below 8 (not well_rated) with the consensus of the episodes whose rating are above 8 (well_rated)**.   
 
 ```{r}
 episodes <- 
     episodes %>% 
-    mutate(bem_avaliado = user_rating >= 8)
+    mutate(well_rated = user_rating >= 8)
 
 episodes %>% 
     select(episode,
            user_rating,
-           bem_avaliado) %>%
+           well_rated) %>%
     sample_n(10)
 ```
 
 ```{r}
 episodes %>% 
-    ggplot(aes(user_votes,bem_avaliado,
-               color = bem_avaliado)) +
+    ggplot(aes(user_votes,well_rated,
+               color = well_rated)) +
     geom_jitter(alpha = .8, width = 0.6) +
     scale_x_continuous(breaks=seq(0,1000000,15000)) +
-            labs(x = "Número de votos")
+            labs(x = "Number of votes")
 ```
 
-Resultados semelhantes à dispersão sem distinção dos bem avaliados (número de votos por nota dada pelo usuário). É ainda mais nítida a ligação entre notas mais altas e maior número de votos. 
+Results similar to the scatter plot, no visible impact of the **well_rated** characteristic. It's even clearer the connection between higher ratings and number of votes. 
 
-### Os episódios mais bem avaliados geram mais consenso?
+### Better rated episodes imply in higher levels of consensus?
 
 ```{r}
 episodes %>% 
-    ggplot(aes(consensus,bem_avaliado,
-               color = bem_avaliado)) +
+    ggplot(aes(consensus,well_rated,
+               color = well_rated)) +
     geom_jitter(alpha=0.08) +
     scale_x_continuous(breaks=seq(0,1,0.1)) +
-    labs(x = "Grau de consenso")
+    labs(x = "Level of consensus")
 
 ```
 
-Curiosamente a massa de maior densidade de ocorrências (parte mais escura) dos dois grupos é relativamente próxima uma da outra, ainda assim é possível perceber que _a massa das ocorrências dos bem avaliados está mais à direita (maior grau de consenso)_.       
+Curiously the mass of higher density in the chart (darker area) of the two groups is relatively close to each other, even so it's still possible to notice that the __mass of occurrences of the *well_rated* is the rightmost one (higher level of consensus)__.       
 
-**Os episódios bem avalidos geram mais consenso**, ocorrências acima dos 0.5/50% são mais frequentes nos bem avaliados e em geral a massa das ocorrências dos bem avaliados está mais à direita (maior grau de consenso) do que os não bem avaliados. 
+**Better rated episodes generate higher level of consensus**, occurrences above 0.5/50% are more frequent in the well_rated episodes  and overall the mass of occurences of the well rated is more to the right (higher level of consensus) than the episodes whom were not well rated. 
 
 <br></br>
 
-### Conclusão
+### Conclusion
 
-* Existe um vísivel acréscimo no número de votos quando passamos para notas mais altas (especialmente acima de 8).
-* Os episódios bem avalidos geram mais consenso.
+* There was a visible increase in the number of votes when we look at higher ratings (specially above 8).
+* Better rated episodes imply in higher levels of consensus.
