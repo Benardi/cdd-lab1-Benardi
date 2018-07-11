@@ -1,13 +1,14 @@
 ---
-title: "EDA on IMDB Series"
+title: "EDA on series ratings on IMDB"
 subtitle: 'Is there a connection between season length, number of votes, ratings and consensus?'
 author: "José Benardi de Souza Nunes"
+date: 06/05/2018
 output:
-  html_notebook:
-    toc: yes
-    toc_float: yes
   html_document:
     df_print: paged
+    toc: yes
+    toc_float: yes
+  html_notebook:
     toc: yes
     toc_float: yes
 ---
@@ -18,7 +19,7 @@ output:
 
 ### Analyzed Dataset
 
-> Exploratory Data Analysis on data from [IMDB](https://www.imdb.com/)  about TV series and Streaming. The original data and variables come from [this repository](https://github.com/nazareno/imdb-series) . There we have explained how the data was retrieved and the meaning of each variable.
+> Exploratory Data Analysis on data from [IMDB](https://www.imdb.com/)  about TV series and Streaming. The original data and variables come from [this repository](https://github.com/nazareno/imdb-series). There you can find explained how the data was retrieved and the meaning of each variable.
 
 ```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
 library(tidyverse)
@@ -79,11 +80,11 @@ episodes %>%
 
 * We have a obvious mode between 0 and 250 votes.
 * The highest values are very far way from the mode, this impacts the distribution mean and median making them higher than the mode. 
-* The are no values that violate the nature of the quantity (e.g. negative values), and would therefore invalidate our analysis. 
+* There are no values that violate the nature of the quantity (e.g. negative values), and would therefore invalidate our analysis. 
 
 <br></br>
 
-Let's look at the _10 most rated episodes_:
+Let's look at the _10 most voted episodes_:
 
 
 ```{r}
@@ -93,7 +94,7 @@ episodes %>%
     arrange(desc(user_votes))
 ```
 
-The top 3 most voted episodes have a sensibly higher number of votes than the rest, particularly the most voted episode of all has 40.000 more votes than the second place.
+The top 3 most voted episodes have a sensibly higher number of votes than the rest. The most voted episode of all in particular has 40.000 more votes than the second most voted episode.
 
 ```{r}
 episodes %>% 
@@ -102,7 +103,7 @@ episodes %>%
         stat_qq()
 ```
 
-* The quantile-quantile plot clearly shows the leap around the highest values, which are very far away from the rest of the distribution.
+* The quantile-quantile plot clearly shows the leap around the highest values which are very far away from the rest of the distribution.
 
 ### Episode rating
 
@@ -120,7 +121,7 @@ episodes %>%
 
 * The most frequent rating is clearly around 8.
 * The distribution is *relatively* well behaved (symetric), there's however the occurrence of lower ratings (between 3 and 6). 
-* The are no values that violate the nature of the quantity (e.g. negative values), and would therefore invalidate our analysis.    
+* There are no values that violate the nature of the quantity (e.g. negative values), and would therefore invalidate our analysis.    
 
 ```{r}
 episodes %>% 
@@ -129,7 +130,7 @@ episodes %>%
         stat_qq() 
 ```
 
-* The lower ratings previously mentioned affect the curvature and prove that the distribution of episodes ratings does not compose a symetric distribution (well behaved).
+* The lower ratings previously mentioned affect the curvature and prove that the distribution of episodes ratings is not symetric (well behaved).
 
 ### Season length
 
@@ -163,9 +164,9 @@ episodes %>%
 
 ```
 
-* The most frequent season length is around 10 and 20 episodes (Two modes ou bimodal).
-* Few seasons are curiously long. 
-* The are no values that violate the nature of the quantity (e.g. negative values), and would therefore invalidate our analysis.
+* The most frequent season lengths are around 10 and 20 episodes (Two modes ou bimodal).
+* Some few seasons are curiously long. 
+* There are no values that violate the nature of the quantity (e.g. negative values), and would therefore invalidate our analysis.
 
 <br></br>
 
@@ -190,13 +191,13 @@ episodes %>%
     stat_qq() 
 ```
 
-* In the Q-Q plot there's a step (descontinuity), which matches the two modes on the respective histogram (two most frequent values).  
+* In the Q-Q plot there's a step (descontinuity), which matches the two modes (two most frequent values) on the respective histogram .  
 
 ### Median season length of a series
 
 To represent the overall season length of a series we will make use of the estimator median. Among the reasons to choose the median over other estimators such as the mean or the trimmed mean we give:
 
-* The median less frequently provides values that aren't integers (e.g. 4.6) which would make no sense as something as a season length.
+* The median less frequently provides values that aren't integers (e.g. 4.6) which would make no sense for something as season length.
 * The median is a robust meausre, in other words it's less easily affected by outliers.
 
 ```{r}
@@ -233,7 +234,7 @@ episodes %>%
 
 ```
 
-* The median season length behaves similarly to the metric seaosn length.
+* The median season length behaves similarly to the metric season length.
 
 ```{r}
 episodes %>%
@@ -244,11 +245,11 @@ episodes %>%
         stat_qq() 
 ```
 
-* The median season length once again behaves similarly to the metric seaosn length.
+* The median season length once again behaves similarly to the metric season length.
 
 ### Consensus about a episode rating
 
-We generated the metric consensus as the maximum relative frequency of the ratings a episode can be given from 1 to 10 (r1 to r10). The more concentrated around a certain rating a episode is the more people agreed on its rating. 
+We generated the metric consensus as the relative frequency of the most frequent rating a episode was given from 1 to 10 (r1 to r10).
 
 ```{r}
 episodes <- episodes %>%
@@ -277,7 +278,7 @@ episodes %>%
 
 * Level of Consensus mode is around 0.3125, in other words most of the time 31.25% of people gave the same rating to an episode.   
 * Higher levels of consensus occur, going up to around 87.50%.  
-* The are no values that violate the nature of the quantity (e.g. negative values), and would therefore invalidate our analysis.        
+* There are no values that violate the nature of the quantity (e.g. negative values), and would therefore invalidate our analysis.        
 
 ```{r}
 episodes %>%
@@ -287,7 +288,7 @@ episodes %>%
         stat_qq() 
 ```
 
-* The higher values which are far away from the mode affect the curvature and prove that the distribution of level of consensus does not compose a symetric distribution (well behaved).
+* The higher values which are far away from the mode affect the curvature and prove that the distribution of level of consensus is not symetric (well behaved).
 
 ***
 
@@ -306,7 +307,7 @@ episodes %>%
          y = "Season length")
 ```
 
-Seasons between 1 and 25 episodes are visibly disperse, with ratings ranging from 3 to 10, as most seasons are around this number of episodes. Despite the aforementioned it's also **visible that most of the occurrences have ratings around 8 (more or less between 7 and 9)**. This pattern overall holds desite the season length and *matches the distribution of ratings mode which is 8*. 
+Seasons between 1 and 25 episodes are visibly disperse with ratings ranging from 3 to 10, it's  **visible that most of the occurrences have ratings around 8 (more or less between 7 and 9)**. This pattern overall holds up despite the season length and *matches the distribution of ratings mode which is 8*. 
 
 There are however, two exceptions:
 
@@ -328,9 +329,9 @@ episodes %>%
          x = "Season length")
 ```
 
-Let's now talk about boxplots focusing in terms of median, for this reason we shall desconsider external points to have a clearer perspective of the chart. In terms of median *what was seen in the scatter plot repeats itself with the drop on the ratings of seasons around 40 episodes.*
+Let's now talk about boxplots while focusing in the median, to do so we shall desconsider external points to have a clearer perspective of the chart. In terms of median *what was seen in the scatter plot repeats itself with the drop on the ratings of seasons around 40 episodes.*
 
-* The boxplot lower and upper limits **(boxplots' whiskers) shows that the increase in the ratings of seasons above 40 episodes doesn't seem very relevant**.
+* The boxplot lower and upper limits **(boxplot whiskers) shows that the increase in the ratings of seasons above 40 episodes doesn't seem very relevant**.
     + The boxplot of these seasons are between the upper and lower limits of the boxplot of shorter seasons (There's a strong Intersection of values).
 
 ### Series of shorter seasons are better rated?
@@ -350,8 +351,8 @@ episodes %>%
 
 ```
 
-Looking at the *ratings per median season length* we see that the distribution of ratings behaves similarly to the *ratings by season length*.
-The perceptible effect of focusing on the  *ratings by median season length* is the even sharper drop of user ratings around 40 episodes.     
+Looking at the *ratings by median season length* we see that the distribution of ratings behaves similarly to the *ratings by season length*.
+The perceptible effect of focusing on the *ratings by median season length* is the even sharper drop of user ratings around 40 episodes.     
 
 ```{r}
 episodes %>%
@@ -389,19 +390,19 @@ episodes %>%
 ```
 
 **The level of consensus for seasons over 30 episodes, overall, remains between 0.2 and 0.5 of consensus** (consensus between 20% and 50%).  
-There's a considerable disperison in terms of level of consensus for seasons up till 30 episodes. This might suggest that the season length is not the appropriate characteristic to explain the level of consensus for seasons around that number of episodes.
+There's a considerable disperson in terms of level of consensus for seasons up till 30 episodes. This might suggest that the season length is not the appropriate characteristic to explain the level of consensus for seasons around that number of episodes.
 
 <br></br>
 
 ### Conclusion
 
-* Overall season length doesn't have a meaningful effect on a series rating. **Season length does not entail in a better or worse rated season looking either at exclusively at the season's length or ar the median length of a serie's season.** 
+* Overall season length doesn't have a meaningful effect on a series rating. **Season length does not entail in a better or worse rated season, whether we look exclusively at the season's length or at the median length of a serie's season.** 
     + The exception to the aforementioned is that for seasons (and series of median season length) above 40 episodes there's a sizable drop on user ratings. 
 
 <br></br>
 
 * For seasons up to 30 episodes the season length does not seem to provide the proper information to explain level of consensus. 
-    + **For seasons over 30 episodes the season length has a limiter effect on the level of consensus**, which in general does not go above 0.5 (50%). Specially large seasons could mean episodes of irregular quality, such as filler episodes.
+    + **For seasons over 30 episodes the season length has a limiting effect on the level of consensus**, which in general does not go above 0.5 (50%). Specially large seasons could mean episodes of irregular quality, such as filler episodes.
 
 ***
 
@@ -435,7 +436,7 @@ episodes %>%
          x = "User rating")
 ```
 
-As has been said before, the rating 8 is a particularly interesting point (mode) in the distribution of ratings. The mean (red line) and the median (green line) also converge to that same rating. For this reason  **we will consider the consensus of the episodes whose ratings are below 8 (not well_rated) with the consensus of the episodes whose rating are above 8 (well_rated)**.   
+As has been said before, the rating 8 is a particularly interesting point (mode) in the distribution of ratings. The mean (red line) and the median (green line) also converge to that same rating. For this reason  **we will compare the consensus of the episodes whose ratings are below 8 (not well_rated) with the consensus of the episodes whose rating are above 8 (well_rated)**.   
 
 ```{r}
 episodes <- 
@@ -481,4 +482,4 @@ Curiously the mass of higher density in the chart (darker area) of the two group
 ### Conclusion
 
 * There was a visible increase in the number of votes when we look at higher ratings (specially above 8).
-* Better rated episodes imply in higher levels of consensus.
+* Better rated episodes seem to imply in higher levels of consensus.
