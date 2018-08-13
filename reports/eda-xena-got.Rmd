@@ -2,7 +2,7 @@
 title: "Chakrans and Dragons on IMDB"
 subtitle: "EDA on IMDB data about Game of Thrones (GoT) and Xena the Warrior Princess"
 author: "José Benardi de Souza Nunes"
-date: 26/04/2018
+date: '26/04/2018'
 output:
   html_document:
     df_print: paged
