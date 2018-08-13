@@ -1,13 +1,14 @@
 ---
 title: "Chakrans and Dragons on IMDB"
-subtitle: "EDA on IMDB data about Game of Thrones (GOT) and Xena the Warrior Princess"
+subtitle: "EDA on IMDB data about Game of Thrones (GoT) and Xena the Warrior Princess"
 author: "José Benardi de Souza Nunes"
+date: 26/04/2018
 output:
-  html_notebook:
-    toc: yes
-    toc_float: yes
   html_document:
     df_print: paged
+    toc: yes
+    toc_float: yes
+  html_notebook:
     toc: yes
     toc_float: yes
 ---
@@ -30,7 +31,7 @@ Original data comes from [this repository](https://github.com/nazareno/imdb-seri
 Before the staggering number of different series available in our data we will analyse the following two:
 
 * Game of Thrones 
-* Xena The Warrior Princess (in portuguese _Xena a Princesa Guerreira_)
+* Xena The Warrior Princess (in Portuguese _Xena a Princesa Guerreira_)
 
 *******
 
@@ -74,10 +75,10 @@ episodes %>%
     facet_wrap(~ season) + 
         labs(x="Season episode",
          y= "Number of votes",
-         title="Distribution of votes per episode throughout seasons (GOT)")
+         title="Distribution of votes per episode throughout seasons (GoT)")
 ```
 
-The series GOT had tenths of thousands of votes for each episode throughout its first five seasons.
+The series GoT had tenths of thousands of votes for each episode throughout its first five seasons.
 Furthermore, there are some episodes with a lot more votes than the rest.
 
 ```{r}
@@ -89,10 +90,10 @@ episodes %>%
     facet_wrap(~ season) + 
     labs(x="Season episode",
          y= "Number of votes",
-         title="Distribution of votes per episode throughout seasons (GOT)")
+         title="Distribution of votes per episode throughout seasons (GoT)")
 ```
 
-On its sixth season GOT had a considerable increase in votes, reaching figures on the scale of hundreds of thousands of votes.
+On its sixth season GoT had a considerable increase in votes, reaching figures on the scale of hundreds of thousands of votes.
 
 ### Hom many episodes per season?
 
@@ -105,7 +106,7 @@ episodes %>%
          title="Number of episodes per season")
 ```
 
-The series Xena has around 20 to 25 episodes per season while GOT maintains the number of 10 episodes per season. 
+The series Xena has around 20 to 25 episodes per season while GoT maintains the number of 10 episodes per season. 
 
 ******
 
@@ -141,8 +142,8 @@ episodes %>%
           axis.ticks.x=element_blank()) +
     labs(y="User rating")
 ```
-* GOT rating overall are higher than Xena's, this is reflected in the chart where both the red violin plot and box plot (GOT) are above the red violin plot and box plot (Xena).
-* The most frequent ratings  for GOT are around [8.5, 9] (lengthiest part of the red violin) while the most frequent ratings for Xena are around 8.0 (lengthiest part of the blue violin). 
+* GoT rating overall are higher than Xena's, this is reflected in the chart where both the red violin plot and box plot (GoT) are above the red violin plot and box plot (Xena).
+* The most frequent ratings  for GoT are around [8.5, 9] (lengthiest part of the red violin) while the most frequent ratings for Xena are around 8.0 (lengthiest part of the blue violin). 
 
 ** The series _Game of Thrones_ seems to be better rated than the series _Xena a Princesa Guerreira_ no IMBD**.  
 
@@ -168,7 +169,7 @@ episodes %>%
           axis.ticks.x=element_blank())
 ```
 
-* Looking at the height of the bars (Mean user rating) it's noticeble that GOT's mean user rating is higher than Xena's mean user rating.
+* Looking at the height of the bars (Mean user rating) it's noticeable that GoT's mean user rating is higher than Xena's mean user rating.
 
 The mean user rating also suggests that the series _Game of Thrones_ **é mais bem avaliada** is better rated than the series _Xena the Warrior Princess_ on IMBD,  the difference seems to be of 1 point and in terms of series ratings **the difference is sizable**.
 
@@ -185,9 +186,9 @@ episodes %>%
     labs(x="Series name", y="User rating")
 ```
 
-The _median rating/box's central horizontal line_ **value that divides other values in 50% bigger and 50% smaller**  and the _interquatile range/box_ **that represents 50% of the values** fluctuate thoughout the series seasons but seem to stay relatively close to the rating 9 for GOT and close to 8 for Xena.
+The _median rating/box's central horizontal line_ **value that divides other values in 50% bigger and 50% smaller**  and the _interquatile range/box_ **that represents 50% of the values** fluctuate throughout the series seasons but seem to stay relatively close to the rating 9 for GoT and close to 8 for Xena.
 
-When we compare the distribution of ratings thoughout the series seasons we notice that **the ratings are affected by what season they belong to** (e.g Xena's ratings show a negative tendency starting from season 4, minimums going from 7 to 6).
+When we compare the distribution of ratings throughout the series seasons we notice that **the ratings are affected by what season they belong to** (e.g Xena's ratings show a negative tendency starting from season 4, minimums going from 7 to 6).
 
 ```{r}
 episodes %>% 
@@ -202,11 +203,11 @@ episodes %>%
     ylab("User rating")
 ```
 
-Comparing the distribution of each series ratings throughout each seasons (ratings from GOT's first season compared to ratings from Xena's first season) we observe that at each of the six seasons the same tendency was mantained. Observing the ratings distribution by means of the interquatile range/box we notice that **On all six seasons  GOT has overall higher ratings than Xena** (GOT's interquatile range is always above Xena's).
+Comparing the distribution of each series ratings throughout each seasons (ratings from GoT's first season compared to ratings from Xena's first season) we observe that at each of the six seasons the same tendency was maintained. Observing the ratings distribution by means of the interquatile range/box we notice that **On all six seasons  GoT has overall higher ratings than Xena** (GoT's interquatile range is always above Xena's).
 
 <br></br>
 
-The series' ratings vary with the seasons but for comparison purposes GOT maintains a higher rating than Xena.
+The series' ratings vary with the seasons but for comparison purposes GoT maintains a higher rating than Xena.
 
 ******
 ## Which series is the one whose episodes' quality is the most irregular?
@@ -220,11 +221,11 @@ episodes %>%
          y="User rating")
 ```
 
-* GOT ratings go from **8 (minimum) to 9.9 (maximum)** and seem to be relatively concentrated around 9, which is in accordance to previous results.
+* GoT ratings go from **8 (minimum) to 9.9 (maximum)** and seem to be relatively concentrated around 9, which is in accordance to previous results.
 
 * Xena's ratings go from **5.9 (minimum) to 8.8 (maximum)** and seem to be relatively concentrated around 8, which is in accordance to previous results.
 
-**The series Xena's ratings seem to be more irregular than GOT's ratings** as they are disperse in a bigger interval [5.9, 8.8] than GOT's [8, 9.9].
+**The series Xena's ratings seem to be more irregular than GoT's ratings** as they are disperse in a bigger interval [5.9, 8.8] than GoT's [8, 9.9].
 
 ```{r}
 episodes %>%
@@ -234,7 +235,7 @@ episodes %>%
          y="Density")
 ```
 
-The smoothed histogram reinforces the idea that **Xena's ratings are more irregular than GOT's** because Xena'ss rating are dispersed around the interval [5.9, 8.8] (beginning and end of blue histogram) while GOT's ratings are dispersed around the interval [8, 9.9] (beggining and end of red histogram). Besides, the smoothed histogram's peak (mode or most frequent value) is around 8 for Xena and around 9 for GOT.
+The smoothed histogram reinforces the idea that **Xena's ratings are more irregular than GoT's** because Xena's rating are dispersed around the interval [5.9, 8.8] (beginning and end of blue histogram) while GoT's ratings are dispersed around the interval [8, 9.9] (beginning and end of red histogram). Besides, the smoothed histogram's peak (mode or most frequent value) is around 8 for Xena and around 9 for GoT.
 
 ```{r}
 episodes %>% 
@@ -259,13 +260,13 @@ episodes %>%
          y="Density")
 ```
 
-Looking at the scatter plot and smoothed histogram of the series seasons it's possible to see that Xena's rating got more disperse starting from season 4 because points around 6 start to occur (distance between points increase and histograms stretch).
+Looking at the scatter plot and smoothed histogram of the series seasons it's possible to see that Xena's rating GoT more disperse starting from season 4 because points around 6 start to occur (distance between points increase and histograms stretch).
 
-** Xena's rating are more irregular than GOT's ratings and the difference is big**, with Xena's rating going from 6 to 9 while GOT's ratings go from 8 to 10.
+** Xena's rating are more irregular than GoT's ratings and the difference is big**, with Xena's rating going from 6 to 9 while GoT's ratings go from 8 to 10.
 
 ******
 
-## Qual das séries tem episódios mais sem graça? (Um episódio é sem graça se ninguém nem ama nem odeia ele)
+## Which of the series has more boring episodes? (An episode is boring when it's neither loved nor hated)
 
 ```{r}
 episodes <- episodes %>%
@@ -282,22 +283,20 @@ episodes %>%
     geom_jitter() +
     theme(axis.title.x=element_blank(),
           axis.text.x=element_blank(),
-          axis.ticks.x=element_blank())
+          axis.ticks.x=element_blank()) +
+    labs(y= "Hated / Loved")
 
 ```
 
-A série Xena apresenta uma grande concentração de episódios que não foram nem amados nem odiados, amado_odiado perto de 0, como mostra claramente o gráfico de dispersão, enquanto a série GOT não possui episódios cujo valor amado_odiado esteja perto de 0. **Portanto a série Xena é a série com mais episódios sem graça.**
+Xena has a higher concentration of episodes that were neither loved nor hated (amado_odiado close to 0) as the scatter plot clearly demonstrates, while GoT has no episode whose Hate/Love (amado_odiado) is close to 0. **Therefore Xena is the series with more boring episodes**. 
 
 ******
 
-## Episódios no início/fim da temporada são mais bem avaliados que os no meio?
+## Episodes at the beggining/end of the season are better rated that those at the middle?
 
-Consideraremos os 20% iniciais e os 20% finais como o começo e fim de temporada, e os 60% entre essas duas parcelas como o meio de temporada. Um episódio será de metade de temporada se estiver incluido nesses 60%.
+We will consider the 20% at the beginning and at the end as the beginning and end of the season, and the central 60% between these two parcels will be the middle of the season. One episode will belong to the middle of the season if it's included in the aforementioned 60%.
 
 ```{r}
-
-
-
 sumario_simples <- 
     episodes %>% 
     select(season_ep,season,series_name) %>%
@@ -321,10 +320,9 @@ episodes
 
 <br></br>
 
-Geramos a informação **_middle_eps_** para representar se uma série é ou não do meio da temporada, está entre os 20% episódios inicias e finais da temporada (no meio). Se **_middle_eps_** é TRUE o episódio é da metade da temporada, se **_middle_eps_** é FALSE o episódio é do começo/fim da temporada.  
+We generated the information **_middle_eps_** to represent whether an episode belongs to the middle of its season, i.e. if it's between the 20% initial episodes and the 20% final episodes. If **_middle_eps_** is TRUE the episode belongs to the middle of the season, if **_middle_eps_** is FALSE the episode belongs to beginning/end of the season.  
 
 ```{r}
-
 filtered <- episodes %>%
     filter(series_name %in% c("Xena a Princesa Guerreira")) %>%
     filter(season == 4)
@@ -335,32 +333,34 @@ filtered %>%
     color = "blue") +
     geom_vline(xintercept = filtered$p80,
     color = "blue") +
-    geom_line()
+    geom_line() +
+    labs(x="Season episode", y="User rating")
 ```
 
-Usando a 4ª temporada da série Xena como exemplo os episódios da metade de temporada seriam aqueles entre as barras azuis (20º percentil e 80º percentil, os quais dividem os valores em 20%-80% e 80%-20% respectivamente e assim o que está entre eles é 60% do total).
+Using the fourth season of Xena as an example the episodes of the middle of the season would be those between the blue vertical lines (percentile 20 and percentile 80, which divide the values in 20%-80% and 80%-20% respectively and thus what's between them is 60% of the total.
 
 ```{r}
 episodes %>% 
   ggplot(aes(user_rating, color=middle_eps)) + 
-    geom_density()
+    geom_density() +
+    labs(x="User rating", y="Density")
 ```
 
-As formas dos histogramas alisados são semelhantes, e o pico de ambos (moda ou valor mais frequente) coincide na nota 8, isso sugere que **sem distinguir as séries umas das outras os episódios no início/fim da temporada são avaliados semelhantemente aos que estão no meio da série**.  
+The shapes of the smoothed histograms are similar, and the peak of both (mode or most frequent value) match on rating 8, this suggests that *without distinguishing seasons from one another the episodes from beggining/end of the season are similarly rated as those from the middle of the season*.
 
-### Muda de acordo com série?
+### Does it change according to series?
 
 ```{r}
 episodes %>% 
   ggplot(aes(x = series_name, y = user_rating, color=middle_eps)) + 
     geom_point(position = position_jitterdodge(dodge.width=0.9)) +
-    geom_boxplot(position = "dodge") 
-
+    geom_boxplot(position = "dodge") +
+    labs(x="Series name", y="User rating")
 ```
 
-Distiguindo as séries é possível notar que os boxplots azuis (que representam os episódios da metade da temporada) estão em geral abaixo dos boxplots vermelhos (que representam os episódios do começo/fim) da temporada. **Assim, em termos de séries os episódios do começo/fim de temporada são mais bem avaliados.**  
+Distinguishing series it's possible to notice that the blue boxplots (representing episodes from the middle of the season) are in general below the red boxplots (representing episodes from the beginning/end of the season). **Therefore in terms of series the episodes of the beggining/end of the season are better rated.**
 
-### Muda de acordo com temporada?
+### Does it change according to season?
 
 ```{r}
 episodes %>% 
@@ -373,14 +373,15 @@ episodes %>%
     theme(axis.title.x=element_blank(),
           axis.text.x=element_blank(),
           axis.ticks.x=element_blank()) +
-    ggtitle("Distribuição de votação metade da temporada versus começo/fim (Xena)")
+    labs(y="User rating",
+         title="Rating distribution of middle vs beggining/end by season (Xena)")
 ```
 
-Para  a série Xena: 
+For the series Xena: 
 
-* Nas temporadas 5 e 6 os episódios de começo/fim de temporada foram mais bem votados
+* On seasons 5 and 6 the episodes at the beginning/end of the season were better rated.
 
-* Na temporada 1,2,3 e 4 a diferença fica menos clara.  
+* On season 1,2,3 and 4 the difference is less clear.  
 
 ```{r}
 episodes %>% 
@@ -393,14 +394,14 @@ episodes %>%
     theme(axis.title.x=element_blank(),
           axis.text.x=element_blank(),
           axis.ticks.x=element_blank()) +
-    ggtitle("Distribuição de votação metada da temporada versus começo/fim (GOT)")
-
+    labs(y="User rating",
+         title="Rating distribution of middle vs beggining/end by season (GoT)")
 ```
 
-Para a série GOT:
+For the series GoT:
  
-* Na 5ª temporada episodios do começo/fim e metade se comportam de maneira similar
+* On season 5 the episodes at the beginning/end of the season and the ones at the middle are rated similarly.
 
-* Nas temporadas 1,2,3,4 e 6  os episódios de começo/fim (boxplots vermelhos) são mais bem avaliados.
+* On seasons 1,2,3,4 and 6 the episodes at the beginning/end of the season are better rated.
 
-Levando em consideração o que foi visto tanto em Xena como em GOT **em termos de temporada os episódios começo/fim tendem a ser mais bem avaliados que os episódios de metade de temporada**.
+Taking in consideration what was seen regarding both Xena as GoT **in terms of season the episodes at the beggining/end of the season tend to be better rated than those at the middle of the season**. 
