@@ -4,18 +4,18 @@ subtitle: 'Interactive Visualization on IMDB data about Game of Thrones (GoT) an
 author: "José Benardi de Souza Nunes"
 date: '22/05/2018'
 output:
-  html_notebook:
-    toc: yes
-    toc_float: yes
   html_document:
     df_print: paged
+    toc: yes
+    toc_float: yes
+  html_notebook:
     toc: yes
     toc_float: yes
 ---
 
 <br></br>
 
-## Introdução
+## Introduction
 
 ***
 
