@@ -1,0 +1,131 @@
+---
+title: "Interactive Visualization on GoT x Xena (IMDB)"
+subtitle: 'Interactive Visualization on IMDB data about Game of Thrones (GoT) and Xena the Warrior Princess'
+author: "José Benardi de Souza Nunes"
+date: '22/05/2018'
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_float: yes
+  html_notebook:
+    toc: yes
+    toc_float: yes
+---
+
+<br></br>
+
+## Introduction
+
+***
+
+Let's compare the series *Game of Thrones* and *Xena the Warrior Princess* to answer :
+
+ * Which one is better rated by users?
+    + The difference is maintained throughout seasons?
+    + Where the episode is placed inside its season (beggining/end or middle) has an effect?
+
+***
+
+### Employed dataset
+
+> Exploratory Data Analysis on data from [IMDB](https://www.imdb.com/) about the series Game of Thrones and Xena the Warrior Princess. The original data and variables como from [this repository](https://github.com/nazareno/imdb-series). There we have an explanation on how the data were generated and on the meaning of each variable.
+
+```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(here)
+library(plotly)
+theme_set(theme_bw())
+```
+
+```{r}
+episodes <- read_csv(here("data/series_from_imdb.csv"), 
+                    progress = FALSE,
+                    col_types = cols(.default = col_double(), 
+                                     series_name = col_character(), 
+                                     episode = col_character(), 
+                                     url = col_character(),
+                                     season = col_character())) %>% 
+    filter(series_name %in% c("Game of Thrones","Xena a Princesa Guerreira")) 
+
+episodes %>% 
+    glimpse()
+```
+
+****
+
+### Episodes from the middle of the season
+
+>In order to make our discussion a little more interesting let's generate a new information: "An episode belongs to the middle of a season?" (*middle_eps*). An episode belongs to the middle of the season when it's in the 60% central episodes of a season.  
+
+```{r}
+sumario_simples <- 
+    episodes %>% 
+    select(season_ep,season,series_name) %>%
+    group_by(series_name,season) %>% 
+    summarise(n = n(),
+               p20 = quantile(seq(from=1, to=n, by=1), 0.20),
+               p80 = quantile(seq(from=1, to=n, by=1), 0.80))
+
+episodes <- left_join(episodes, sumario_simples,
+                      by = c("series_name", "season")) %>% 
+    group_by(series_name, season) %>%
+    mutate(middle_eps = (season_ep > p20) &
+               (season_ep < p80)) %>% 
+    ungroup()
+episodes %>% 
+    select(series_name, series_ep, middle_eps)
+```
+
+***
+
+## So, who fared better?
+
+<br></br>
+
+Let's compare the ratings of the episodes of both series throughout their **6 seasons:**
+
+<br></br>
+
+```{r, warning=FALSE, message=FALSE}
+m <- list(
+  b = 100,
+  r = 185,
+  t = 75
+  )
+
+p <- episodes %>% 
+      ggplot(aes(x = series_name, y = user_rating, 
+                 color=middle_eps,
+                 group=episode, text = paste(
+                    "Series:", series_name,
+                    "\nEpisode:", episode,
+                    "\nRating:", user_rating
+                     ))) + 
+        geom_jitter(width = 0.3, alpha=0.7) +
+        facet_wrap(~ season) +
+        xlab("") +
+        ylab("User Rating\n.") +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1))  +
+        scale_x_discrete(labels=c("GoT", "Xena")) +
+        labs(color='Middle of the season?') +
+        ggtitle(paste("GoT x Xena (Season by Season)")) +
+        theme_update(plot.title = element_text(hjust = -1))
+ggplotly(p, tooltip = "text") %>%
+  layout(autosize = F, margin = m)
+```
+
+It's possible to notice that **throughout the six seasons** (on seasons 5 and 6 being less unanimous), be it episodes from the $\color{red}{\text{beginning/end of the season}}$ be it episodes from the $\color{blue}{\text{middle of the season}}$, **Game of Thrones (GoT) is better rated than Xena the Warrior Princess (Xena)**. 
+
+***
+
+### Better rated episodes (Curiosity)
+
+Among the competitors for highest rating (**9,9**) we have:
+
+* $\color{red}{\text{The Rains of Castemere}}$ : Episode that broke the heart of many fans, without spoilers we can say that some considered abandoning the series so big was the heartbreak. 
+
+* $\color{red}{\text{Battle of the Bastards}}$ and $\color{red}{\text{The Winds of Winter}}$ : The first one has the biggest battle enacted throughout the whole series as I'm writing this. The second one has suicides, explosions and the most expected revelation of the whole series:  $R + L = J$. 
+
+* $\color{blue}{\text{Hardhome}}$ : This episode from **season 5** had special effects of such high quality that rumors spread that the visual quality for the rest of the season went downhill  for lack of budget.
+
